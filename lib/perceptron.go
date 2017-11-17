@@ -1,15 +1,16 @@
 package sabadisambiguator
 
 import (
-	"bufio"
 	"fmt"
 	"os"
+	"encoding/json"
+	"io/ioutil"
 )
 
 type PerceptronClassifier struct {
-	weight    map[string]float64
-	cumWeight map[string]float64
-	count     int
+	Weight    map[string]float64
+	CumWeight map[string]float64
+	Count     int
 }
 
 func newPerceptronClassifier() *PerceptronClassifier {
@@ -42,19 +43,19 @@ func (model *PerceptronClassifier) learn(example Example) {
 	predict := model.predictForTraining(example.Fv)
 	if example.Label != predict {
 		for _, f := range example.Fv {
-			w, _ := model.weight[f]
-			cumW, _ := model.cumWeight[f]
-			model.weight[f] = w + float64(example.Label)*1.0
-			model.cumWeight[f] = cumW + float64(model.count)*float64(example.Label)*1.0
+			w, _ := model.Weight[f]
+			cumW, _ := model.CumWeight[f]
+			model.Weight[f] = w + float64(example.Label)*1.0
+			model.CumWeight[f] = cumW + float64(model.Count)*float64(example.Label)*1.0
 		}
-		model.count += 1
+		model.Count += 1
 	}
 }
 
 func (model *PerceptronClassifier) predictForTraining(features FeatureVector) LabelType {
 	result := 0.0
 	for _, f := range features {
-		w, ok := model.weight[f]
+		w, ok := model.Weight[f]
 		if ok {
 			result = result + w*1.0
 		}
@@ -68,14 +69,14 @@ func (model *PerceptronClassifier) predictForTraining(features FeatureVector) La
 func (model PerceptronClassifier) PredictScore(features FeatureVector) float64 {
 	result := 0.0
 	for _, f := range features {
-		w, ok := model.weight[f]
+		w, ok := model.Weight[f]
 		if ok {
 			result = result + w*1.0
 		}
 
-		w, ok = model.cumWeight[f]
+		w, ok = model.CumWeight[f]
 		if ok {
-			result = result - w*1.0/float64(model.count)
+			result = result - w*1.0/float64(model.Count)
 		}
 
 	}
@@ -98,21 +99,16 @@ func ExtractGoldLabels(examples Examples) []LabelType {
 }
 
 func WritePerceptron(perceptron PerceptronClassifier, filename string) error {
-	fp, err := os.Create(filename)
-	defer fp.Close()
+	perceptronJson, err := json.Marshal(perceptron)
 	if err != nil {
 		return err
 	}
 
-	writer := bufio.NewWriter(fp)
-
-	for k, v := range perceptron.weight {
-		_, err := writer.WriteString(k + "\t" + fmt.Sprintf("%f", v))
-		if err != nil {
-			return err
-		}
+	err = ioutil.WriteFile(filename, perceptronJson, 0644)
+	if err != nil {
+		return err
 	}
 
-	writer.Flush()
 	return nil
 }
+
