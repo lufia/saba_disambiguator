@@ -5,6 +5,7 @@ import (
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/ikawaha/kagome.ipadic/tokenizer"
+	"strconv"
 )
 
 type FeatureVector []string
@@ -28,6 +29,20 @@ func extractJpnNounFeatures(s string, prefix string) FeatureVector {
 	return fv
 }
 
+func containsMackerelInScreenName(screenName string) bool {
+	return strings.Contains(strings.ToLower(screenName), "mackerel")
+}
+
+func includeMackerelInUserMentions(t twitter.Tweet) bool {
+	result := false
+	for _, m := range t.Entities.UserMentions {
+		if containsMackerelInScreenName(m.ScreenName) {
+			return true
+		}
+	}
+	return result
+}
+
 func ExtractNounFeatures(s string, prefix string) FeatureVector {
 	return extractJpnNounFeatures(s, prefix)
 }
@@ -35,7 +50,12 @@ func ExtractNounFeatures(s string, prefix string) FeatureVector {
 func ExtractFeatures(t twitter.Tweet) FeatureVector {
 	var fv FeatureVector
 	text := t.Text
+
 	fv = append(fv, "BIAS")
+	fv = append(fv, "ScreenName:"+t.User.ScreenName)
+	fv = append(fv, "containsMackerelInScreenName:"+strconv.FormatBool(containsMackerelInScreenName(t.User.ScreenName)))
+	fv = append(fv, "includeMackerelInUserMentions:"+strconv.FormatBool(includeMackerelInUserMentions(t)))
+
 	fv = append(fv, ExtractNounFeatures(text, "BODY")...)
 	return fv
 }
