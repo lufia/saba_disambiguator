@@ -1,10 +1,10 @@
 package sabadisambiguator
 
 import (
-	"fmt"
-	"os"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
+	"os"
 )
 
 type PerceptronClassifier struct {
@@ -111,4 +111,3 @@ func WritePerceptron(perceptron PerceptronClassifier, filename string) error {
 
 	return nil
 }
-

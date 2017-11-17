@@ -6,15 +6,15 @@ import (
 	"os"
 	"strings"
 
+	"encoding/json"
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
-	"encoding/json"
 	"strconv"
 )
 
 func parseLine(line string) (int64, error) {
 	tokens := strings.Split(line, "/")
-	id := tokens[len(tokens) - 1]
+	id := tokens[len(tokens)-1]
 	return strconv.ParseInt(id, 10, 64)
 }
 
