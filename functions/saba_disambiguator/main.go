@@ -3,50 +3,75 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"encoding/json"
+	"github.com/bluele/slack"
+	"github.com/apex/go-apex"
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 	"github.com/syou6162/saba_disambiguator/lib"
 )
 
 func main() {
-	consumerKey := os.Getenv("TWITTER_CONSUMER_KEY")
-	consumerSecret := os.Getenv("TWITTER_CONSUMER_SECRET")
-	accessToken := os.Getenv("TWITTER_ACCESS_TOKEN")
-	accessSecret := os.Getenv("TWITTER_ACCESS_SECRET")
+	apex.HandleFunc(func(event json.RawMessage, ctx *apex.Context) (interface{}, error) {
+		slackToken := os.Getenv("SLACK_TOKEN")
+		channelName := os.Getenv("SLACK_CHANNEL_NAME")
 
-	config := oauth1.NewConfig(consumerKey, consumerSecret)
-	token := oauth1.NewToken(accessToken, accessSecret)
-	httpClient := config.Client(oauth1.NoContext, token)
-	client := twitter.NewClient(httpClient)
+		consumerKey := os.Getenv("TWITTER_CONSUMER_KEY")
+		consumerSecret := os.Getenv("TWITTER_CONSUMER_SECRET")
+		accessToken := os.Getenv("TWITTER_ACCESS_TOKEN")
+		accessSecret := os.Getenv("TWITTER_ACCESS_SECRET")
 
-	modelJson, err := sabadisambiguator.Asset("model/model.bin")
-	if err != nil {
-		panic(err)
-	}
-	model := sabadisambiguator.PerceptronClassifier{}
-	err = json.Unmarshal(modelJson, &model)
-	if err != nil {
-		panic(err)
-	}
+		config := oauth1.NewConfig(consumerKey, consumerSecret)
+		token := oauth1.NewToken(accessToken, accessSecret)
+		httpClient := config.Client(oauth1.NoContext, token)
+		client := twitter.NewClient(httpClient)
 
-	search, _, err := client.Search.Tweets(&twitter.SearchTweetParams{
-		// Query:      "mackerel lang:ja until:2017-11-16",
-		Query:      "mackerel lang:ja",
-		Count:      100,
-		ResultType: "recent",
-	})
-
-	if err != nil {
-		panic(err)
-	}
-
-	for _, t := range search.Statuses {
-		fv := sabadisambiguator.ExtractFeatures(t)
-		if model.Predict(fv) == sabadisambiguator.POSITIVE {
-			fmt.Fprintf(os.Stderr, "https://twitter.com/%s/status/%s\n", t.User.ScreenName, t.IDStr)
-			fmt.Fprint(os.Stderr, "%s\n", t.Text)
+		modelJson, err := sabadisambiguator.Asset("model/model.bin")
+		if err != nil {
+			panic(err)
 		}
-	}
+		model := sabadisambiguator.PerceptronClassifier{}
+		err = json.Unmarshal(modelJson, &model)
+		if err != nil {
+			panic(err)
+		}
+
+		search, _, err := client.Search.Tweets(&twitter.SearchTweetParams{
+			// Query:      "mackerel lang:ja until:2017-11-16",
+			Query:      "mackerel lang:ja",
+			Count:      100,
+			ResultType: "recent",
+		})
+
+		if err != nil {
+			panic(err)
+		}
+
+		api := slack.New(slackToken)
+
+		now := time.Now()
+
+		for _, t := range search.Statuses {
+			createdAt, err := t.CreatedAtTime()
+			if err != nil {
+				panic(err)
+			}
+			if now.After(createdAt.Add(5 * time.Minute)) {
+				continue
+			}
+
+			fv := sabadisambiguator.ExtractFeatures(t)
+			if model.Predict(fv) == sabadisambiguator.POSITIVE {
+				err := api.ChatPostMessage(channelName, fmt.Sprintf("https://twitter.com/%s/status/%s", t.User.ScreenName, t.IDStr), nil)
+				if err != nil {
+					panic(err)
+				}
+				fmt.Fprintf(os.Stderr, "https://twitter.com/%s/status/%s\n", t.User.ScreenName, t.IDStr)
+				// fmt.Fprint(os.Stderr, "%s\n", t.Text)
+			}
+		}
+		return nil, nil
+	})
 }
