@@ -28,9 +28,10 @@ func readExamplesFromFile(fileName string, label sabadisambiguator.LabelType) (s
 		text := scanner.Text()
 
 		t, err := parseLine(text)
-		if err != nil {
+		if err != nil || t.ID == 0 {
 			continue
 		}
+
 		e := sabadisambiguator.NewExample(t, label)
 		examples = append(examples, e)
 	}
