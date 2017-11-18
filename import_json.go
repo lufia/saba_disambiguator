@@ -7,9 +7,10 @@ import (
 	"strings"
 
 	"encoding/json"
+	"strconv"
+
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
-	"strconv"
 )
 
 func parseLine(line string) (int64, error) {

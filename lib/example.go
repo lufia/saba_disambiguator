@@ -1,8 +1,9 @@
 package sabadisambiguator
 
 import (
-	"github.com/dghubble/go-twitter/twitter"
 	"math/rand"
+
+	"github.com/dghubble/go-twitter/twitter"
 )
 
 type LabelType int

@@ -6,8 +6,9 @@ import (
 	"time"
 
 	"encoding/json"
-	"github.com/bluele/slack"
+
 	"github.com/apex/go-apex"
+	"github.com/bluele/slack"
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 	"github.com/syou6162/saba_disambiguator/lib"

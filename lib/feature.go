@@ -3,9 +3,10 @@ package sabadisambiguator
 import (
 	"strings"
 
+	"strconv"
+
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/ikawaha/kagome.ipadic/tokenizer"
-	"strconv"
 )
 
 type FeatureVector []string
