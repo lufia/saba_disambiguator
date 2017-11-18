@@ -36,6 +36,14 @@ func NewPerceptronClassifier(examples Examples) *PerceptronClassifier {
 		f := (2 * recall * precision) / (recall + precision)
 		fmt.Fprintln(os.Stderr, fmt.Sprintf("Iter:%d\tAccuracy:%0.03f\tPrecision:%0.03f\tRecall:%0.03f\tF-value:%0.03f", iter, accuracy, precision, recall, f))
 	}
+	for _, e := range dev {
+		predLabel := model.Predict(e.Fv)
+		if predLabel != e.Label {
+			url := fmt.Sprintf( "https://twitter.com/%s/status/%s", e.Tweet.User.ScreenName, e.Tweet.IDStr)
+			fmt.Println(fmt.Sprintf("%d\t%d\t%s", e.Label, predLabel, url))
+		}
+	}
+
 	return model
 }
 
