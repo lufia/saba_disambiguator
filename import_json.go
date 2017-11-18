@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"encoding/json"
 	"strconv"
@@ -31,6 +32,7 @@ func main() {
 	client := twitter.NewClient(httpClient)
 
 	stdin := bufio.NewScanner(os.Stdin)
+	cnt := 0
 	for stdin.Scan() {
 		if err := stdin.Err(); err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -42,8 +44,17 @@ func main() {
 			continue
 		}
 
-		tweet, _, _ := client.Statuses.Show(id, nil)
+		tweet, resp, err := client.Statuses.Show(id, nil)
+		if resp.StatusCode != 200 {
+			fmt.Fprintln(os.Stderr, resp)
+			fmt.Fprintln(os.Stderr, err)
+		}
+
 		tweetJson, _ := json.Marshal(tweet)
 		fmt.Println(string(tweetJson))
+		cnt += 1
+		if cnt%10 == 0 {
+			time.Sleep(5 * time.Second)
+		}
 	}
 }
