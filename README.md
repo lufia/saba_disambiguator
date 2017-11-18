@@ -37,6 +37,7 @@ https://twitter.com/mackerelio_jp/status/931369140534747137
 ```
 
 # AWS Lambdaで動かす
+## Deeploy
 AWS Lambdaへのdeployは[apex](https://github.com/apex/apex)を使います。AWS Lambdaへの適切なIAMポリシーを作り、`apex init`で初期設定を行ないます。初期化後、`project.json`ができているので、追加で設定を行なっていきます。
 
 ```
@@ -61,3 +62,8 @@ AWS Lambdaへのdeployは[apex](https://github.com/apex/apex)を使います。A
 - `TWITTER_*`はTwitterの検索結果を取得するために必要です
 - `SLACK_TOKEN`はSlackへの投稿に必要です。正例であると判定されたtweetは`SLACK_CHANNEL_NAME`に投稿されます
   - debug用に負例と判定されたtweetも知りたい場合は、`SLACK_CHANNEL_NAME_NEGATIVE`を設定しておけば負例もそのチャンネルに投稿されます
+
+## CloudWatchイベントを用いてスケジューリングする
+これまでに作ったLambda関数を定期実行するようにしましょう。CloudWatchイベントで5分置きに実行するのがオススメです。
+
+- [チュートリアル: CloudWatch イベント を使用して AWS Lambda 関数をスケジュールする - Amazon CloudWatch Events](http://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/events/RunLambdaSchedule.html)
