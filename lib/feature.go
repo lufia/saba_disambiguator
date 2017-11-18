@@ -43,6 +43,10 @@ func includeMackerelInUserMentions(t twitter.Tweet) bool {
 	return result
 }
 
+func lang(t twitter.Tweet) string {
+	return t.Lang
+}
+
 func ExtractNounFeatures(s string, prefix string) FeatureVector {
 	return extractJpnNounFeatures(s, prefix)
 }
@@ -53,6 +57,7 @@ func ExtractFeatures(t twitter.Tweet) FeatureVector {
 
 	fv = append(fv, "BIAS")
 	fv = append(fv, "ScreenName:"+t.User.ScreenName)
+	fv = append(fv, "lang:"+lang(t))
 	fv = append(fv, "containsMackerelInScreenName:"+strconv.FormatBool(containsMackerelInScreenName(t.User.ScreenName)))
 	fv = append(fv, "includeMackerelInUserMentions:"+strconv.FormatBool(includeMackerelInUserMentions(t)))
 
