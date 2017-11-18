@@ -16,7 +16,8 @@ import (
 func main() {
 	apex.HandleFunc(func(event json.RawMessage, ctx *apex.Context) (interface{}, error) {
 		slackToken := os.Getenv("SLACK_TOKEN")
-		channelName := os.Getenv("SLACK_CHANNEL_NAME")
+		channelNamePositive := os.Getenv("SLACK_CHANNEL_NAME")
+		channelNameNegative := os.Getenv("SLACK_CHANNEL_NAME_NEGATIVE")
 
 		consumerKey := os.Getenv("TWITTER_CONSUMER_KEY")
 		consumerSecret := os.Getenv("TWITTER_CONSUMER_SECRET")
@@ -63,13 +64,19 @@ func main() {
 			}
 
 			fv := sabadisambiguator.ExtractFeatures(t)
-			if model.Predict(fv) == sabadisambiguator.POSITIVE {
-				err := api.ChatPostMessage(channelName, fmt.Sprintf("https://twitter.com/%s/status/%s", t.User.ScreenName, t.IDStr), nil)
+			predLabel := model.Predict(fv)
+			if predLabel == sabadisambiguator.POSITIVE {
+				err := api.ChatPostMessage(channelNamePositive, fmt.Sprintf("https://twitter.com/%s/status/%s", t.User.ScreenName, t.IDStr), nil)
 				if err != nil {
 					panic(err)
 				}
 				fmt.Fprintf(os.Stderr, "https://twitter.com/%s/status/%s\n", t.User.ScreenName, t.IDStr)
 				// fmt.Fprint(os.Stderr, "%s\n", t.Text)
+			} else if (predLabel == sabadisambiguator.NEGATIVE) && (channelNameNegative != "") {
+				err := api.ChatPostMessage(channelNameNegative, fmt.Sprintf("https://twitter.com/%s/status/%s", t.User.ScreenName, t.IDStr), nil)
+				if err != nil {
+					panic(err)
+				}
 			}
 		}
 		return nil, nil
