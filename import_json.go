@@ -48,6 +48,7 @@ func main() {
 		if resp.StatusCode != 200 {
 			fmt.Fprintln(os.Stderr, resp)
 			fmt.Fprintln(os.Stderr, err)
+			continue
 		}
 
 		tweetJson, _ := json.Marshal(tweet)
