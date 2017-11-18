@@ -36,3 +36,28 @@ https://twitter.com/mackerelio_jp/status/931369140534747137
 % go-bindata -pkg=sabadisambiguator -o=lib/model.go model/
 ```
 
+# AWS Lambdaで動かす
+AWS Lambdaへのdeployは[apex](https://github.com/apex/apex)を使います。AWS Lambdaへの適切なIAMポリシーを作り、`apex init`で初期設定を行ないます。初期化後、`project.json`ができているので、追加で設定を行なっていきます。
+
+```
+{
+  "name": "saba_disambiguator",
+  "description": "",
+  "memory": 256,
+  "timeout": 60,
+  "role": "arn:aws:iam::326910485554:role/saba_disambiguator_lambda_function",
+  "environment": {
+    "TWITTER_CONSUMER_KEY": "XXXXX",
+    "TWITTER_CONSUMER_SECRET": "XXXXX",
+    "TWITTER_ACCESS_TOKEN": "XXXXX",
+    "TWITTER_ACCESS_SECRET": "XXXXX",
+    "SLACK_TOKEN": "XXXXX",
+    "SLACK_CHANNEL_NAME": "my_mackerel_social",
+  }
+}
+```
+
+- `memory`と`timeout`は必要に応じて大きくしましょう
+- `TWITTER_*`はTwitterの検索結果を取得するために必要です
+- `SLACK_TOKEN`はSlackへの投稿に必要です。正例であると判定されたtweetは`SLACK_CHANNEL_NAME`に投稿されます
+  - debug用に負例と判定されたtweetも知りたい場合は、`SLACK_CHANNEL_NAME_NEGATIVE`を設定しておけば負例もそのチャンネルに投稿されます
