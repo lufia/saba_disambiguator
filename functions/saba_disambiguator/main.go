@@ -69,7 +69,7 @@ func main() {
 			}
 
 			if predLabel == sabadisambiguator.POSITIVE {
-				fmt.Fprintf(os.Stderr, tweetPermalink)
+				fmt.Fprintf(os.Stderr, "%s\n", tweetPermalink)
 				err := slack.Send(webhookUrlPositive, "", payload)
 				if err != nil {
 					panic(err)
