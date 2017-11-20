@@ -32,8 +32,8 @@ func main() {
 	client := twitter.NewClient(httpClient)
 
 	stdin := bufio.NewScanner(os.Stdin)
-	cnt := 0
 	for stdin.Scan() {
+		time.Sleep(1 * time.Second)
 		if err := stdin.Err(); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		}
@@ -53,9 +53,5 @@ func main() {
 
 		tweetJson, _ := json.Marshal(tweet)
 		fmt.Println(string(tweetJson))
-		cnt += 1
-		if cnt%10 == 0 {
-			time.Sleep(5 * time.Second)
-		}
 	}
 }
