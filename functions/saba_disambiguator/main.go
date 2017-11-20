@@ -41,8 +41,7 @@ func main() {
 		}
 
 		search, _, err := client.Search.Tweets(&twitter.SearchTweetParams{
-			// Query:      "mackerel lang:ja until:2017-11-16",
-			Query:      "mackerel lang:ja",
+			Query:      "mackerel lang:ja exclude:retweets",
 			Count:      100,
 			ResultType: "recent",
 		})
