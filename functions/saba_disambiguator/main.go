@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 
 	"github.com/apex/go-apex"
-	"github.com/bluele/slack"
+	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 	"github.com/syou6162/saba_disambiguator/lib"
@@ -16,9 +16,8 @@ import (
 
 func main() {
 	apex.HandleFunc(func(event json.RawMessage, ctx *apex.Context) (interface{}, error) {
-		slackToken := os.Getenv("SLACK_TOKEN")
-		channelNamePositive := os.Getenv("SLACK_CHANNEL_NAME")
-		channelNameNegative := os.Getenv("SLACK_CHANNEL_NAME_NEGATIVE")
+		webhookUrlPositive := os.Getenv("SLACK_WEBHOOK_URL")
+		webhookUrlNegative := os.Getenv("SLACK_WEBHOOK_URL_NEGATIVE")
 
 		consumerKey := os.Getenv("TWITTER_CONSUMER_KEY")
 		consumerSecret := os.Getenv("TWITTER_CONSUMER_SECRET")
@@ -50,8 +49,6 @@ func main() {
 			panic(err)
 		}
 
-		api := slack.New(slackToken)
-
 		now := time.Now()
 
 		for _, t := range search.Statuses {
@@ -65,15 +62,20 @@ func main() {
 
 			fv := sabadisambiguator.ExtractFeatures(t)
 			predLabel := model.Predict(fv)
+
+			tweetPermalink := fmt.Sprintf("https://twitter.com/%s/status/%s", t.User.ScreenName, t.IDStr)
+			payload := slack.Payload{
+				Text: tweetPermalink,
+			}
+
 			if predLabel == sabadisambiguator.POSITIVE {
-				err := api.ChatPostMessage(channelNamePositive, fmt.Sprintf("https://twitter.com/%s/status/%s", t.User.ScreenName, t.IDStr), nil)
+				fmt.Fprintf(os.Stderr, tweetPermalink)
+				err := slack.Send(webhookUrlPositive, "", payload)
 				if err != nil {
 					panic(err)
 				}
-				fmt.Fprintf(os.Stderr, "https://twitter.com/%s/status/%s\n", t.User.ScreenName, t.IDStr)
-				// fmt.Fprint(os.Stderr, "%s\n", t.Text)
-			} else if (predLabel == sabadisambiguator.NEGATIVE) && (channelNameNegative != "") {
-				err := api.ChatPostMessage(channelNameNegative, fmt.Sprintf("https://twitter.com/%s/status/%s", t.User.ScreenName, t.IDStr), nil)
+			} else if (predLabel == sabadisambiguator.NEGATIVE) && (webhookUrlNegative != "") {
+				err := slack.Send(webhookUrlNegative, "", payload)
 				if err != nil {
 					panic(err)
 				}
