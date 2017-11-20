@@ -73,7 +73,7 @@ func extractNounFeaturesFromUserDescription(t twitter.Tweet) FeatureVector {
 	if t.QuotedStatus == nil {
 		return fv
 	}
-	return ExtractNounFeatures(t.User.Description, "UserDEscription")
+	return ExtractNounFeatures(t.User.Description, "UserDescription")
 }
 
 func screenNameInQuotedStatus(t twitter.Tweet) string {
