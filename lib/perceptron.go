@@ -18,7 +18,8 @@ func newPerceptronClassifier() *PerceptronClassifier {
 }
 
 func NewPerceptronClassifier(examples Examples) *PerceptronClassifier {
-	train, dev := splitTrainAndDev(examples)
+	train_, dev := splitTrainAndDev(examples)
+	train := overSampling(train_)
 	model := newPerceptronClassifier()
 	for iter := 0; iter < 30; iter++ {
 		shuffle(train)
