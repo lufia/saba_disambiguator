@@ -1,9 +1,9 @@
 package sabadisambiguator
 
 import (
-	"strings"
-
+	"net/url"
 	"strconv"
+	"strings"
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/ikawaha/kagome.ipadic/tokenizer"
@@ -96,6 +96,27 @@ func domainsInEntities(t twitter.Tweet) FeatureVector {
 	return fv
 }
 
+func wordsInUrlPaths(t twitter.Tweet) FeatureVector {
+	var fv FeatureVector
+	if t.Entities == nil {
+		return fv
+	}
+
+	for _, url_ := range t.Entities.Urls {
+		u, err := url.Parse(url_.ExpandedURL)
+		if err != nil {
+			continue
+		}
+		for _, w := range strings.Split(u.Path, "/") {
+			if w == "" {
+				continue
+			}
+			fv = append(fv, "wordsInUrlPaths:"+w)
+		}
+	}
+	return fv
+}
+
 func hashtagsInEntities(t twitter.Tweet) FeatureVector {
 	var fv FeatureVector
 	if t.Entities == nil {
@@ -126,5 +147,6 @@ func ExtractFeatures(t twitter.Tweet) FeatureVector {
 	fv = append(fv, extractNounFeaturesFromUserDescription(t)...)
 	fv = append(fv, domainsInEntities(t)...)
 	fv = append(fv, hashtagsInEntities(t)...)
+	fv = append(fv, wordsInUrlPaths(t)...)
 	return fv
 }
