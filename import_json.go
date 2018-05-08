@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 	"time"
@@ -20,11 +21,39 @@ func parseLine(line string) (int64, error) {
 	return strconv.ParseInt(id, 10, 64)
 }
 
+type Environment struct {
+	TwitterConsumerKey    string `json:"TWITTER_CONSUMER_KEY"`
+	TwitterConsumerSecret string `json:"TWITTER_CONSUMER_SECRET"`
+	TwitterAccessToken    string `json:"TWITTER_ACCESS_TOKEN"`
+	TwitterAccessSecret   string `json:"TWITTER_ACCESS_SECRET"`
+}
+
+type ProjectSetting struct {
+	Environment Environment `json:environment`
+}
+
+func readProjectFile(fileName string) (*ProjectSetting, error) {
+	var projectSetting ProjectSetting
+	b, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := json.Unmarshal(b, &projectSetting); err != nil {
+		return nil, err
+	}
+	return &projectSetting, nil
+}
+
 func main() {
-	consumerKey := os.Getenv("TWITTER_CONSUMER_KEY")
-	consumerSecret := os.Getenv("TWITTER_CONSUMER_SECRET")
-	accessToken := os.Getenv("TWITTER_ACCESS_TOKEN")
-	accessSecret := os.Getenv("TWITTER_ACCESS_SECRET")
+	p, err := readProjectFile("project.json")
+	if err != nil {
+		panic(err)
+	}
+	consumerKey := p.Environment.TwitterConsumerKey
+	consumerSecret := p.Environment.TwitterConsumerSecret
+	accessToken := p.Environment.TwitterAccessToken
+	accessSecret := p.Environment.TwitterAccessSecret
 
 	config := oauth1.NewConfig(consumerKey, consumerSecret)
 	token := oauth1.NewToken(accessToken, accessSecret)
