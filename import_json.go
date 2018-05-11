@@ -1,6 +1,6 @@
 // +build ignore
 
-package import_json
+package main
 
 import (
 	"bufio"
