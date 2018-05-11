@@ -1,6 +1,6 @@
 // +build ignore
 
-package main
+package train_perceptron
 
 import (
 	"bufio"
