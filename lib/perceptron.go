@@ -40,7 +40,7 @@ func NewPerceptronClassifier(examples Examples) *PerceptronClassifier {
 	for _, e := range dev {
 		predLabel := model.Predict(e.Fv)
 		if predLabel != e.Label {
-			url := fmt.Sprintf( "https://twitter.com/%s/status/%s", e.Tweet.User.ScreenName, e.Tweet.IDStr)
+			url := fmt.Sprintf("https://twitter.com/%s/status/%s", e.Tweet.User.ScreenName, e.Tweet.IDStr)
 			fmt.Println(fmt.Sprintf("%d\t%d\t%s", e.Label, predLabel, url))
 		}
 	}
