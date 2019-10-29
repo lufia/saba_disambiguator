@@ -120,3 +120,15 @@ func WritePerceptron(perceptron PerceptronClassifier, filename string) error {
 
 	return nil
 }
+
+func LoadPerceptron(filename string) (*PerceptronClassifier, error) {
+	perceptron := PerceptronClassifier{}
+	data, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(data, &perceptron); err != nil {
+		return nil, err
+	}
+	return &perceptron, nil
+}
