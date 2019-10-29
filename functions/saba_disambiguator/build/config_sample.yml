@@ -1,0 +1,8 @@
+twitter:
+  consumerKey: "consumerKey"
+  consumerSecret: "consumerSecret"
+  aceessToken: "aceessToken"
+  accessSecret: "accessSecret"
+slack:
+  webhookUrlPositive: "webhookUrlPositive"
+  webhookUrlNegative: "webhookUrlNegative"

@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Create Lambda function by using AWS SAM.
+Resources:
+  LambdaSabaDisambiguator:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: saba_disambiguator
+      Runtime: go1.x
+      MemorySize: 256
+      CodeUri: functions/saba_disambiguator/build
+      Timeout: 120
+      Role: !GetAtt LambdaSabaDisambiguatorRole.Arn
+  LambdaSabaDisambiguatorRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: saba_disambiguator_policy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource:
+                  - arn:aws:logs:*:*:*
+              - Effect: Allow
+                Action:
+                  - lambda:*
+                Resource: "*"
+      Path: "/"
+  LambdaSabaDisambiguatorRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: MackerelSocialNextCron
+      ScheduleExpression: rate(5 minutes)
+      Targets:
+        - Id: LambdaSabaDisambiguator
+          Arn:
+            Fn::GetAtt:
+              - LambdaSabaDisambiguator
+              - Arn
+      State: "ENABLED"
+  LambdaSabaDisambiguatorPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref LambdaSabaDisambiguator
+      SourceArn:
+        Fn::GetAtt:
+          - LambdaSabaDisambiguatorRule
+          - Arn
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com

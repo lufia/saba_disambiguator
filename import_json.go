@@ -5,7 +5,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 	"time"
@@ -15,6 +14,7 @@ import (
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
+	sabadisambiguator "github.com/syou6162/saba_disambiguator/lib"
 )
 
 func parseLine(line string) (int64, error) {
@@ -23,43 +23,19 @@ func parseLine(line string) (int64, error) {
 	return strconv.ParseInt(id, 10, 64)
 }
 
-type Environment struct {
-	TwitterConsumerKey    string `json:"TWITTER_CONSUMER_KEY"`
-	TwitterConsumerSecret string `json:"TWITTER_CONSUMER_SECRET"`
-	TwitterAccessToken    string `json:"TWITTER_ACCESS_TOKEN"`
-	TwitterAccessSecret   string `json:"TWITTER_ACCESS_SECRET"`
-}
-
-type ProjectSetting struct {
-	Environment Environment `json:environment`
-}
-
-func readProjectFile(fileName string) (*ProjectSetting, error) {
-	var projectSetting ProjectSetting
-	b, err := ioutil.ReadFile(fileName)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := json.Unmarshal(b, &projectSetting); err != nil {
-		return nil, err
-	}
-	return &projectSetting, nil
-}
-
 func main() {
-	p, err := readProjectFile("project.json")
+	config, err := sabadisambiguator.GetConfigFromFile("functions/saba_disambiguator/build/config.yml")
 	if err != nil {
 		panic(err)
 	}
-	consumerKey := p.Environment.TwitterConsumerKey
-	consumerSecret := p.Environment.TwitterConsumerSecret
-	accessToken := p.Environment.TwitterAccessToken
-	accessSecret := p.Environment.TwitterAccessSecret
-
-	config := oauth1.NewConfig(consumerKey, consumerSecret)
-	token := oauth1.NewToken(accessToken, accessSecret)
-	httpClient := config.Client(oauth1.NoContext, token)
+	token := oauth1.NewToken(
+		config.TwitterConfig.AceessToken,
+		config.TwitterConfig.AccessSecret,
+	)
+	httpClient := oauth1.NewConfig(
+		config.TwitterConfig.ConsumerKey,
+		config.TwitterConfig.ConsumerSecret,
+	).Client(oauth1.NoContext, token)
 	client := twitter.NewClient(httpClient)
 
 	stdin := bufio.NewScanner(os.Stdin)
