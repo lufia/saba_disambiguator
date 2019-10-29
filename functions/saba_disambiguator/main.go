@@ -32,9 +32,13 @@ func DoDisambiguate() error {
 	if err != nil {
 		return err
 	}
+	query := "mackerel lang:ja exclude:retweets"
+	if config.Query != "" {
+		query = config.Query
+	}
 
 	search, _, err := client.Search.Tweets(&twitter.SearchTweetParams{
-		Query:      "mackerel lang:ja exclude:retweets",
+		Query:      query,
 		Count:      100,
 		ResultType: "recent",
 	})
