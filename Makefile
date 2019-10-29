@@ -15,6 +15,9 @@ format:
 
 sam-package:
 	cd functions/saba_disambiguator; GOARCH=amd64 GOOS=linux go build -o build/saba_disambiguator main.go
+	if aws s3 ls "s3://${BUCKET_NAME}" 2>&1 | grep -q 'AccessDenied'; then \
+		echo "AccessDenied" && exit 1; \
+	fi
 	if aws s3 ls "s3://${BUCKET_NAME}" 2>&1 | grep -q 'NoSuchBucket'; then \
 		aws s3 mb s3://${BUCKET_NAME}; \
 	fi
