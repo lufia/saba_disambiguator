@@ -23,7 +23,7 @@ sam-package:
 	fi
 	${AWSCMD} package \
 		--template-file template.yml \
-		--s3-bucket saba-disambiguator \
+		--s3-bucket ${BUCKET_NAME} \
 		--output-template-file sam.yml \
 
 sam-deploy:
