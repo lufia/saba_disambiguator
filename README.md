@@ -30,11 +30,7 @@ https://twitter.com/mackerelio_jp/status/931369140534747137
 % go run train_perceptron.go pos.json neg.json
 ```
 
-学習の完了後、`model/model.bin`というファイルが自動生成されているはずです。AWS Lambdaにシングルバイナリで転送したい都合上、モデルファイルもgoのプログラムである必要があります。[go-bindata](https://github.com/jteeuwen/go-bindata)を用いて変換します。変換が正しく行なわれていれば、`lib/model.go`というファイルが生成されているはずです。
-
-```
-% go-bindata -pkg=sabadisambiguator -o=lib/model.go model/
-```
+学習の完了後、`model/model.bin`というファイルが自動生成されているはずです。
 
 # AWS Lambdaで動かす
 ## Deeploy
