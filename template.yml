@@ -7,6 +7,7 @@ Resources:
     Properties:
       Handler: saba_disambiguator
       Runtime: go1.x
+      MemorySize: 256
       CodeUri: functions/saba_disambiguator/build
       Timeout: 120
       Role: !GetAtt LambdaSabaDisambiguatorRole.Arn
