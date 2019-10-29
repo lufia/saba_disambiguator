@@ -5,37 +5,32 @@ import (
 	"os"
 	"time"
 
-	"encoding/json"
-
 	"github.com/ashwanthkumar/slack-go-webhook"
-	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
-	"github.com/syou6162/saba_disambiguator/lib"
+	sabadisambiguator "github.com/syou6162/saba_disambiguator/lib"
 )
 
-func DoDisambiguate() {
-	webhookUrlPositive := os.Getenv("SLACK_WEBHOOK_URL")
-	webhookUrlNegative := os.Getenv("SLACK_WEBHOOK_URL_NEGATIVE")
+func DoDisambiguate() error {
+	config, err := sabadisambiguator.GetConfigFromFile("build/config.yml")
+	if err != nil {
+		return err
+	}
+	fmt.Println(*config)
 
-	consumerKey := os.Getenv("TWITTER_CONSUMER_KEY")
-	consumerSecret := os.Getenv("TWITTER_CONSUMER_SECRET")
-	accessToken := os.Getenv("TWITTER_ACCESS_TOKEN")
-	accessSecret := os.Getenv("TWITTER_ACCESS_SECRET")
-
-	config := oauth1.NewConfig(consumerKey, consumerSecret)
-	token := oauth1.NewToken(accessToken, accessSecret)
-	httpClient := config.Client(oauth1.NoContext, token)
+	token := oauth1.NewToken(
+		config.TwitterConfig.AceessToken,
+		config.TwitterConfig.AccessSecret,
+	)
+	httpClient := oauth1.NewConfig(
+		config.TwitterConfig.ConsumerKey,
+		config.TwitterConfig.ConsumerSecret,
+	).Client(oauth1.NoContext, token)
 	client := twitter.NewClient(httpClient)
 
-	modelJson, err := sabadisambiguator.Asset("model/model.bin")
+	model, err := sabadisambiguator.LoadPerceptron("build/model.bin")
 	if err != nil {
-		panic(err)
-	}
-	model := sabadisambiguator.PerceptronClassifier{}
-	err = json.Unmarshal(modelJson, &model)
-	if err != nil {
-		panic(err)
+		return err
 	}
 
 	search, _, err := client.Search.Tweets(&twitter.SearchTweetParams{
@@ -45,7 +40,7 @@ func DoDisambiguate() {
 	})
 
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	now := time.Now()
@@ -66,22 +61,30 @@ func DoDisambiguate() {
 		payload := slack.Payload{
 			Text: tweetPermalink,
 		}
+		fmt.Println(tweetPermalink)
+
+		continue
 
 		if predLabel == sabadisambiguator.POSITIVE {
 			fmt.Fprintf(os.Stderr, "%s\n", tweetPermalink)
-			err := slack.Send(webhookUrlPositive, "", payload)
+			err := slack.Send(config.SlackConfig.WebhookUrlPositive, "", payload)
 			if err != nil {
 				panic(err)
 			}
-		} else if (predLabel == sabadisambiguator.NEGATIVE) && (webhookUrlNegative != "") {
-			err := slack.Send(webhookUrlNegative, "", payload)
+		} else if (predLabel == sabadisambiguator.NEGATIVE) && (config.SlackConfig.WebhookUrlNegative != "") {
+			err := slack.Send(config.SlackConfig.WebhookUrlNegative, "", payload)
 			if err != nil {
 				panic(err)
 			}
 		}
 	}
+	return nil
 }
 
 func main() {
-	lambda.Start(DoDisambiguate)
+	err := DoDisambiguate()
+	if err != nil {
+		fmt.Println(err)
+	}
+	// lambda.Start(DoDisambiguate)
 }
