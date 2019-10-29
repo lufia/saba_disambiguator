@@ -12,7 +12,7 @@ import (
 )
 
 func DoDisambiguate() error {
-	config, err := sabadisambiguator.GetConfigFromFile("build/config.yml")
+	config, err := sabadisambiguator.GetConfigFromFile("config.yml")
 	if err != nil {
 		return err
 	}
@@ -28,7 +28,7 @@ func DoDisambiguate() error {
 	).Client(oauth1.NoContext, token)
 	client := twitter.NewClient(httpClient)
 
-	model, err := sabadisambiguator.LoadPerceptron("build/model.bin")
+	model, err := sabadisambiguator.LoadPerceptron("model.bin")
 	if err != nil {
 		return err
 	}
