@@ -1,16 +1,29 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"time"
 
+	"cloud.google.com/go/bigquery"
 	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 	sabadisambiguator "github.com/syou6162/saba_disambiguator/lib"
 )
+
+type ItemForBigQuery struct {
+	CreatedAt  time.Time `bigquery:"created_at"`
+	IdStr      string    `bigquery:"id_str"`
+	ScreenName string    `bigquery:"screen_name"`
+	Text       string    `bigquery:"text"`
+	RawJson    string    `bigquery:"raw_json"`
+	Score      float64   `bigquery:"score"`
+	IsPositive bool      `bigquery:"is_positive"`
+}
 
 func DoDisambiguate() error {
 	config, err := sabadisambiguator.GetConfigFromFile("config.yml")
@@ -48,6 +61,7 @@ func DoDisambiguate() error {
 	}
 
 	now := time.Now()
+	itemsForBq := make([]*ItemForBigQuery, 0)
 
 	for _, t := range search.Statuses {
 		createdAt, err := t.CreatedAtTime()
@@ -58,8 +72,23 @@ func DoDisambiguate() error {
 			continue
 		}
 
+		tweetJson, err := json.Marshal(t)
+		if err != nil {
+			panic(err)
+		}
 		fv := sabadisambiguator.ExtractFeatures(t)
+		score := model.PredictScore(fv)
 		predLabel := model.Predict(fv)
+		item := ItemForBigQuery{
+			CreatedAt:  createdAt,
+			IdStr:      t.IDStr,
+			ScreenName: t.User.ScreenName,
+			Text:       t.Text,
+			RawJson:    string(tweetJson),
+			Score:      score,
+			IsPositive: predLabel == sabadisambiguator.POSITIVE,
+		}
+		itemsForBq = append(itemsForBq, &item)
 
 		tweetPermalink := fmt.Sprintf("https://twitter.com/%s/status/%s", t.User.ScreenName, t.IDStr)
 		payload := slack.Payload{
@@ -80,6 +109,22 @@ func DoDisambiguate() error {
 			}
 		}
 	}
+
+	if config.BigQueryConfig.ProjectId != "" && len(itemsForBq) > 0 {
+		ctx := context.Background()
+		bqClient, err := bigquery.NewClient(ctx, config.BigQueryConfig.ProjectId)
+		if err != nil {
+			panic(err)
+		}
+		defer bqClient.Close()
+
+		u := bqClient.Dataset(config.BigQueryConfig.Dataset).Table(config.BigQueryConfig.Table).Inserter()
+		err = u.Put(ctx, itemsForBq)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	return nil
 }
 

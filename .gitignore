@@ -5,3 +5,4 @@ sam.yml
 functions/saba_disambiguator/build/config.yml
 functions/saba_disambiguator/build/model.bin
 functions/saba_disambiguator/build/saba_disambiguator
+functions/saba_disambiguator/build/google_application_credentials.json
