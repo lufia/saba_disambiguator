@@ -9,7 +9,7 @@ Resources:
       Runtime: go1.x
       CodeUri: functions/saba_disambiguator/build
       Timeout: 120
-      Role: !GetAtt LambdaFetchTweetRole.Arn
+      Role: !GetAtt LambdaSabaDisambiguatorRole.Arn
   LambdaSabaDisambiguatorRole:
     Type: AWS::IAM::Role
     Properties:
