@@ -11,6 +11,9 @@ Resources:
       CodeUri: functions/saba_disambiguator/build
       Timeout: 120
       Role: !GetAtt LambdaSabaDisambiguatorRole.Arn
+      Environment:
+        Variables:
+          GOOGLE_APPLICATION_CREDENTIALS: google_application_credentials.json
   LambdaSabaDisambiguatorRole:
     Type: AWS::IAM::Role
     Properties:
