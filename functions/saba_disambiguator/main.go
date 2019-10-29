@@ -110,7 +110,7 @@ func DoDisambiguate() error {
 		}
 	}
 
-	if config.BigQueryConfig.ProjectId != "" {
+	if config.BigQueryConfig.ProjectId != "" && len(itemsForBq) > 0 {
 		ctx := context.Background()
 		bqClient, err := bigquery.NewClient(ctx, config.BigQueryConfig.ProjectId)
 		if err != nil {
