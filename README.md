@@ -33,33 +33,20 @@ https://twitter.com/mackerelio_jp/status/931369140534747137
 学習の完了後、`model/model.bin`というファイルが自動生成されているはずです。
 
 # AWS Lambdaで動かす
-## Deeploy
-AWS Lambdaへのdeployは[apex](https://github.com/apex/apex)を使います。AWS Lambdaへの適切なIAMポリシーを作り、`apex init`で初期設定を行ないます。初期化後、`project.json`ができているので、追加で設定を行なっていきます。
-
-```
-{
-  "name": "saba_disambiguator",
-  "description": "",
-  "memory": 256,
-  "timeout": 60,
-  "role": "arn:aws:iam::326910485554:role/saba_disambiguator_lambda_function",
-  "environment": {
-    "TWITTER_CONSUMER_KEY": "XXXXX",
-    "TWITTER_CONSUMER_SECRET": "XXXXX",
-    "TWITTER_ACCESS_TOKEN": "XXXXX",
-    "TWITTER_ACCESS_SECRET": "XXXXX",
-    "SLACK_TOKEN": "XXXXX",
-    "SLACK_CHANNEL_NAME": "my_mackerel_social",
-  }
-}
-```
+## 設定ファイル
+動かす前に設定が必要です。設定は`functions/saba_disambiguator/build/config.yml`に書きます。`functions/saba_disambiguator/build/config_sample.yml`にサンプルがあるので、それを参考にするとよいでしょう。
 
 - `memory`と`timeout`は必要に応じて大きくしましょう
 - `TWITTER_*`はTwitterの検索結果を取得するために必要です
 - `SLACK_TOKEN`はSlackへの投稿に必要です。正例であると判定されたtweetは`SLACK_CHANNEL_NAME`に投稿されます
   - debug用に負例と判定されたtweetも知りたい場合は、`SLACK_CHANNEL_NAME_NEGATIVE`を設定しておけば負例もそのチャンネルに投稿されます
 
-## CloudWatchイベントを用いてスケジューリングする
-これまでに作ったLambda関数を定期実行するようにしましょう。CloudWatchイベントで5分置きに実行するのがオススメです。
+## Deeploy
+AWS Lambdaへのdeployは[SAM](https://aws.amazon.com/jp/serverless/sam/)を使います。以下のコマンドでdeployできます。
 
-- [チュートリアル: CloudWatch イベント を使用して AWS Lambda 関数をスケジュールする - Amazon CloudWatch Events](http://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/events/RunLambdaSchedule.html)
+```
+% make sam-package sam-deploy
+```
+
+## CloudWatchイベントを用いてスケジューリングする
+SAMでdeployをすると自動的にCloudWatchイベントでスケジュールされます。間隔を変更したい場合はスケジューリングをoffにしたい場合は`template.yml`を変更してから再deployしましょう。
