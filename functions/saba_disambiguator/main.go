@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/ashwanthkumar/slack-go-webhook"
+	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 	sabadisambiguator "github.com/syou6162/saba_disambiguator/lib"
@@ -16,7 +17,6 @@ func DoDisambiguate() error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(*config)
 
 	token := oauth1.NewToken(
 		config.TwitterConfig.AceessToken,
@@ -63,8 +63,6 @@ func DoDisambiguate() error {
 		}
 		fmt.Println(tweetPermalink)
 
-		continue
-
 		if predLabel == sabadisambiguator.POSITIVE {
 			fmt.Fprintf(os.Stderr, "%s\n", tweetPermalink)
 			err := slack.Send(config.SlackConfig.WebhookUrlPositive, "", payload)
@@ -82,9 +80,5 @@ func DoDisambiguate() error {
 }
 
 func main() {
-	err := DoDisambiguate()
-	if err != nil {
-		fmt.Println(err)
-	}
-	// lambda.Start(DoDisambiguate)
+	lambda.Start(DoDisambiguate)
 }
