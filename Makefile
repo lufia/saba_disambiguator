@@ -29,7 +29,7 @@ sam-package:
 sam-deploy:
 	${AWSCMD} deploy \
 		--template-file sam.yml \
-		--stack-name saba_disambiguator \
+		--stack-name saba-disambiguator \
 		--capabilities CAPABILITY_IAM
 
 deploy:
