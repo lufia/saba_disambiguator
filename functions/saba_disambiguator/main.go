@@ -83,7 +83,7 @@ func DoDisambiguate() error {
 			CreatedAt:  createdAt,
 			IdStr:      t.IDStr,
 			ScreenName: t.User.ScreenName,
-			Text:       t.FullText,
+			Text:       t.Text,
 			RawJson:    string(tweetJson),
 			Score:      score,
 			IsPositive: predLabel == sabadisambiguator.POSITIVE,
