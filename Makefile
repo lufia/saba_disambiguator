@@ -32,7 +32,4 @@ sam-deploy:
 		--stack-name saba-disambiguator \
 		--capabilities CAPABILITY_IAM
 
-deploy:
-	apex deploy
-
-.PHONY: import learn deploy 
+.PHONY: import learn sam-package sam-deploy
