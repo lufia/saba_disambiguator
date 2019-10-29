@@ -19,15 +19,14 @@ https://twitter.com/mackerelio_jp/status/931369140534747137
 教師ラベルが整備できたら各tweetに対応するJSONファイルを収集します。これでデータの整備は完了です。
 
 ```
-% cat data/pos.txt | go run import_json.go > pos.json
-% cat data/neg.txt | go run import_json.go > neg.json
+% make import
 ```
 
 ## 分類器の学習
 データの整備が完了したので、教師データを用いて以下のコマンドで分類器(平均化パーセプトロン)を学習させます。
 
 ```
-% go run train_perceptron.go pos.json neg.json
+% make learn
 ```
 
 学習の完了後、`model/model.bin`というファイルが自動生成されているはずです。
@@ -36,7 +35,6 @@ https://twitter.com/mackerelio_jp/status/931369140534747137
 ## 設定ファイル
 動かす前に設定が必要です。設定は`functions/saba_disambiguator/build/config.yml`に書きます。`functions/saba_disambiguator/build/config_sample.yml`にサンプルがあるので、それを参考にするとよいでしょう。
 
-- `memory`と`timeout`は必要に応じて大きくしましょう
 - `TWITTER_*`はTwitterの検索結果を取得するために必要です
 - `SLACK_TOKEN`はSlackへの投稿に必要です。正例であると判定されたtweetは`SLACK_CHANNEL_NAME`に投稿されます
   - debug用に負例と判定されたtweetも知りたい場合は、`SLACK_CHANNEL_NAME_NEGATIVE`を設定しておけば負例もそのチャンネルに投稿されます
