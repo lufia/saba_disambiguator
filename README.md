@@ -29,7 +29,7 @@ https://twitter.com/mackerelio_jp/status/931369140534747137
 % make learn
 ```
 
-学習の完了後、`model/model.bin`というファイルが自動生成されているはずです。
+学習の完了後、`functions/saba_disambiguator/build/model.bin`というファイルが自動生成されているはずです。
 
 # AWS Lambdaで動かす
 ## 設定ファイル
