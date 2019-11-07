@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/dghubble/go-twitter/twitter"
-	"github.com/syou6162/saba_disambiguator/lib"
+	sabadisambiguator "github.com/syou6162/saba_disambiguator/lib"
 )
 
 func parseLine(line string) (twitter.Tweet, error) {
@@ -56,5 +56,5 @@ func main() {
 
 	examples := append(examplesPos, examplesNeg...)
 	p := sabadisambiguator.NewPerceptronClassifier(examples)
-	sabadisambiguator.WritePerceptron(*p, "model/model.bin")
+	sabadisambiguator.WritePerceptron(*p, "functions/saba_disambiguator/build/model.bin")
 }
