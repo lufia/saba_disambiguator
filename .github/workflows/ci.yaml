@@ -12,4 +12,4 @@ jobs:
     - name: Build
       env:
         GOPATH: /home/runner/work/
-      run: go build -o build/saba_disambiguator main.go
+      run: cd functions/saba_disambiguator && go build -o build/saba_disambiguator main.go
