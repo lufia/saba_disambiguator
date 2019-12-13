@@ -1,9 +1,21 @@
 AWSCMD=aws cloudformation
 BUCKET_NAME ?= saba-disambiguator
 
+import-pos:
+	touch _pos.json pos.json && cat _pos.json pos.json | jq -r .id_str > pos_cache_ids
+	cat data/pos.txt | go run import_json.go pos_cache_ids | tee -a _pos.json
+	cat _pos.json | jq --slurp --compact-output 'unique_by(.id_str) | .[]' > pos.json
+	
+import-neg:
+	touch _neg.json neg.json && cat _neg.json neg.json | jq -r .id_str > neg_cache_ids
+	cat data/neg.txt | go run import_json.go neg_cache_ids | tee -a _neg.json
+	cat _neg.json | jq --slurp --compact-output 'unique_by(.id_str) | .[]' > neg.json
+
 import:
-	cat data/pos.txt | go run import_json.go > pos.json
-	cat data/neg.txt | go run import_json.go > neg.json
+	@make import-pos import-neg
+
+clean:
+	rm _neg.json _pos.json neg.json neg_cache_ids pos.json pos_cache_ids
 
 learn:
 	go run train_perceptron.go pos.json neg.json

@@ -23,6 +23,27 @@ func parseLine(line string) (int64, error) {
 	return strconv.ParseInt(id, 10, 64)
 }
 
+func cacheIdsFromFile(filename string) (map[int64]struct{}, error) {
+	cachedIds := make(map[int64]struct{})
+
+	fp, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer fp.Close()
+
+	scanner := bufio.NewScanner(fp)
+	for scanner.Scan() {
+		text := scanner.Text()
+		id, err := parseLine(text)
+		if err != nil {
+			continue
+		}
+		cachedIds[id] = struct{}{}
+	}
+	return cachedIds, nil
+}
+
 func main() {
 	config, err := sabadisambiguator.GetConfigFromFile("functions/saba_disambiguator/build/config.yml")
 	if err != nil {
@@ -38,9 +59,13 @@ func main() {
 	).Client(oauth1.NoContext, token)
 	client := twitter.NewClient(httpClient)
 
+	cachedIds, err := cacheIdsFromFile(os.Args[1])
+	if err != nil {
+		panic(err)
+	}
+
 	stdin := bufio.NewScanner(os.Stdin)
 	for stdin.Scan() {
-		time.Sleep(1 * time.Second)
 		if err := stdin.Err(); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		}
@@ -48,6 +73,9 @@ func main() {
 		text := stdin.Text()
 		id, err := parseLine(text)
 		if err != nil {
+			continue
+		}
+		if _, ok := cachedIds[id]; ok {
 			continue
 		}
 
@@ -60,5 +88,6 @@ func main() {
 
 		tweetJson, _ := json.Marshal(tweet)
 		fmt.Println(string(tweetJson))
+		time.Sleep(1 * time.Second)
 	}
 }
