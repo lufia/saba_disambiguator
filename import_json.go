@@ -79,6 +79,7 @@ func main() {
 			continue
 		}
 
+		time.Sleep(1 * time.Second)
 		tweet, resp, err := client.Statuses.Show(id, nil)
 		if resp.StatusCode != 200 {
 			fmt.Fprintln(os.Stderr, resp)
@@ -88,6 +89,5 @@ func main() {
 
 		tweetJson, _ := json.Marshal(tweet)
 		fmt.Println(string(tweetJson))
-		time.Sleep(1 * time.Second)
 	}
 }
