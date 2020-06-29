@@ -3,7 +3,7 @@ module saba_disambiguator
 go 1.12
 
 require (
-	cloud.google.com/go/bigquery v1.5.0
+	cloud.google.com/go/bigquery v1.9.0
 	github.com/ashwanthkumar/slack-go-webhook v0.0.0-20181208062437-4a19b1a876b7
 	github.com/aws/aws-lambda-go v1.15.0
 	github.com/dghubble/go-twitter v0.0.0-20190719072343-39e5462e111f
