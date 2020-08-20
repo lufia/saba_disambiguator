@@ -7,15 +7,15 @@ import (
 )
 
 type TwitterConfig struct {
-	ConsumerKey    string `yaml:"consumerKey"`
-	ConsumerSecret string `yaml:"consumerSecret"`
-	AceessToken    string `yaml:"aceessToken"`
-	AccessSecret   string `yaml:"accessSecret"`
+	ParameterStoreNameConsumerKey    string `yaml:"parameterStoreNameConsumerKey"`
+	ParameterStoreNameConsumerSecret string `yaml:"parameterStoreNameConsumerSecret"`
+	ParameterStoreNameAccessToken    string `yaml:"parameterStoreNameAccessToken"`
+	ParameterStoreNameAccessSecret   string `yaml:"parameterStoreNameAccessSecret"`
 }
 
 type SlackConfig struct {
-	WebhookUrlPositive string `yaml:"webhookUrlPositive"`
-	WebhookUrlNegative string `yaml:"webhookUrlNegative"`
+	ParameterStoreNameWebhookUrlPositive string `yaml:"parameterStoreNameWebhookUrlPositive"`
+	ParameterStoreNameWebhookUrlNegative string `yaml:"parameterStoreNameWebhookUrlNegative"`
 }
 
 type BigQueryConfig struct {
