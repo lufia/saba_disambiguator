@@ -152,7 +152,7 @@ func DoDisambiguate() error {
 	for _, t := range search.Statuses {
 		createdAt, err := t.CreatedAtTime()
 		if err != nil {
-			panic(err)
+			return err
 		}
 		if now.After(createdAt.Add(5 * time.Minute)) {
 			continue
@@ -160,7 +160,7 @@ func DoDisambiguate() error {
 
 		tweetJson, err := json.Marshal(t)
 		if err != nil {
-			panic(err)
+			return err
 		}
 		fv := sabadisambiguator.ExtractFeatures(t)
 		score := model.PredictScore(fv)
@@ -186,12 +186,12 @@ func DoDisambiguate() error {
 			fmt.Fprintf(os.Stderr, "%s\n", tweetPermalink)
 			err := slack.Send(slackConfig.WebhookUrlPositive, "", payload)
 			if err != nil {
-				panic(err)
+				return err
 			}
 		} else if (predLabel == sabadisambiguator.NEGATIVE) && (slackConfig.WebhookUrlNegative != "") {
 			err := slack.Send(slackConfig.WebhookUrlNegative, "", payload)
 			if err != nil {
-				panic(err)
+				return err
 			}
 		}
 	}
