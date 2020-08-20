@@ -10,6 +10,9 @@ import (
 	"cloud.google.com/go/bigquery"
 	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ssm"
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 	sabadisambiguator "github.com/syou6162/saba_disambiguator/lib"
@@ -25,19 +28,70 @@ type ItemForBigQuery struct {
 	IsPositive bool      `bigquery:"is_positive"`
 }
 
+type TwitterConfig struct {
+	ConsumerKey    string
+	ConsumerSecret string
+	AccessToken    string
+	AccessSecret   string
+}
+
+func getValueFromParameterStore(svc *ssm.SSM, name string) (string, error) {
+	res, err := svc.GetParameter(&ssm.GetParameterInput{
+		Name:           aws.String(name),
+		WithDecryption: aws.Bool(true),
+	})
+	if err != nil {
+		return "", err
+	}
+	val := *res.Parameter.Value
+	return val, nil
+}
+
+func getTwitterConfig(svc *ssm.SSM, config sabadisambiguator.Config) (TwitterConfig, error) {
+	twitterConfig := TwitterConfig{}
+
+	consumerKey, err := getValueFromParameterStore(svc, config.TwitterConfig.ParameterStoreNameConsumerKey)
+	if err != nil {
+		return twitterConfig, err
+	}
+	twitterConfig.ConsumerKey = consumerKey
+
+	consumerSecret, err := getValueFromParameterStore(svc, config.TwitterConfig.ParameterStoreNameConsumerSecret)
+	if err != nil {
+		return twitterConfig, err
+	}
+	twitterConfig.ConsumerSecret = consumerSecret
+
+	accessToken, err := getValueFromParameterStore(svc, config.TwitterConfig.ParameterStoreNameAccessToken)
+	if err != nil {
+		return twitterConfig, err
+	}
+	twitterConfig.AccessToken = accessToken
+
+	accessSecret, err := getValueFromParameterStore(svc, config.TwitterConfig.ParameterStoreNameAccessSecret)
+	if err != nil {
+		return twitterConfig, err
+	}
+	twitterConfig.AccessSecret = accessSecret
+
+	return twitterConfig, nil
+}
+
 func DoDisambiguate() error {
 	config, err := sabadisambiguator.GetConfigFromFile("config.yml")
 	if err != nil {
 		return err
 	}
+	svc := ssm.New(session.New(), &aws.Config{
+		Region: aws.String("ap-northeast-1"),
+	})
 
-	token := oauth1.NewToken(
-		config.TwitterConfig.AceessToken,
-		config.TwitterConfig.AccessSecret,
-	)
+	twitterConfig, err := getTwitterConfig(svc, *config)
+
+	token := oauth1.NewToken(twitterConfig.AccessToken, twitterConfig.AccessSecret)
 	httpClient := oauth1.NewConfig(
-		config.TwitterConfig.ConsumerKey,
-		config.TwitterConfig.ConsumerSecret,
+		twitterConfig.ConsumerKey,
+		twitterConfig.ConsumerSecret,
 	).Client(oauth1.NoContext, token)
 	client := twitter.NewClient(httpClient)
 
