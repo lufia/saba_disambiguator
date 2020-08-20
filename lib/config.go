@@ -19,9 +19,10 @@ type SlackConfig struct {
 }
 
 type BigQueryConfig struct {
-	ProjectId string `yaml:"projectId"`
-	Dataset   string `yaml:"dataset"`
-	Table     string `yaml:"table"`
+	ParameterStoreNameServiceAccountCredential string `yaml:"parameterStoreNameServiceAccountCredential"`
+	ProjectId                                  string `yaml:"projectId"`
+	Dataset                                    string `yaml:"dataset"`
+	Table                                      string `yaml:"table"`
 }
 
 type Config struct {

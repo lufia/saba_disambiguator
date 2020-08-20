@@ -16,6 +16,7 @@ import (
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 	sabadisambiguator "github.com/syou6162/saba_disambiguator/lib"
+	"google.golang.org/api/option"
 )
 
 type ItemForBigQuery struct {
@@ -196,8 +197,12 @@ func DoDisambiguate() error {
 	}
 
 	if config.BigQueryConfig.ProjectId != "" && len(itemsForBq) > 0 {
+		serviceAccountCredential, err := getValueFromParameterStore(svc, config.BigQueryConfig.ParameterStoreNameServiceAccountCredential)
+		if err != nil {
+			return err
+		}
 		ctx := context.Background()
-		bqClient, err := bigquery.NewClient(ctx, config.BigQueryConfig.ProjectId)
+		bqClient, err := bigquery.NewClient(ctx, config.BigQueryConfig.ProjectId, option.WithCredentialsJSON([]byte(serviceAccountCredential)))
 		if err != nil {
 			panic(err)
 		}
