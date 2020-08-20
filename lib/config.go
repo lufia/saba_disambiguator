@@ -7,21 +7,22 @@ import (
 )
 
 type TwitterConfig struct {
-	ConsumerKey    string `yaml:"consumerKey"`
-	ConsumerSecret string `yaml:"consumerSecret"`
-	AceessToken    string `yaml:"aceessToken"`
-	AccessSecret   string `yaml:"accessSecret"`
+	ParameterStoreNameConsumerKey    string `yaml:"parameterStoreNameConsumerKey"`
+	ParameterStoreNameConsumerSecret string `yaml:"parameterStoreNameConsumerSecret"`
+	ParameterStoreNameAccessToken    string `yaml:"parameterStoreNameAccessToken"`
+	ParameterStoreNameAccessSecret   string `yaml:"parameterStoreNameAccessSecret"`
 }
 
 type SlackConfig struct {
-	WebhookUrlPositive string `yaml:"webhookUrlPositive"`
-	WebhookUrlNegative string `yaml:"webhookUrlNegative"`
+	ParameterStoreNameWebhookUrlPositive string `yaml:"parameterStoreNameWebhookUrlPositive"`
+	ParameterStoreNameWebhookUrlNegative string `yaml:"parameterStoreNameWebhookUrlNegative"`
 }
 
 type BigQueryConfig struct {
-	ProjectId string `yaml:"projectId"`
-	Dataset   string `yaml:"dataset"`
-	Table     string `yaml:"table"`
+	ParameterStoreNameServiceAccountCredential string `yaml:"parameterStoreNameServiceAccountCredential"`
+	ProjectId                                  string `yaml:"projectId"`
+	Dataset                                    string `yaml:"dataset"`
+	Table                                      string `yaml:"table"`
 }
 
 type Config struct {
@@ -29,6 +30,7 @@ type Config struct {
 	SlackConfig    SlackConfig    `yaml:"slack"`
 	BigQueryConfig BigQueryConfig `yaml:"bigquery"`
 	Query          string         `yaml:"query"`
+	Region         string         `yaml:"region"`
 }
 
 func GetConfigFromFile(configPath string) (*Config, error) {
