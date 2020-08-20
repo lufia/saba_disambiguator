@@ -186,12 +186,12 @@ func DoDisambiguate() error {
 			fmt.Fprintf(os.Stderr, "%s\n", tweetPermalink)
 			err := slack.Send(slackConfig.WebhookUrlPositive, "", payload)
 			if err != nil {
-				return err
+				return err[0]
 			}
 		} else if (predLabel == sabadisambiguator.NEGATIVE) && (slackConfig.WebhookUrlNegative != "") {
 			err := slack.Send(slackConfig.WebhookUrlNegative, "", payload)
 			if err != nil {
-				return err
+				return err[0]
 			}
 		}
 	}
