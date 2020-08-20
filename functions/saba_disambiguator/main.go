@@ -114,6 +114,11 @@ func DoDisambiguate() error {
 		return err
 	}
 
+	slackConfig, err := getSlackConfig(svc, *config)
+	if err != nil {
+		return err
+	}
+
 	token := oauth1.NewToken(twitterConfig.AccessToken, twitterConfig.AccessSecret)
 	httpClient := oauth1.NewConfig(
 		twitterConfig.ConsumerKey,
