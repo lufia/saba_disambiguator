@@ -204,14 +204,14 @@ func DoDisambiguate() error {
 		ctx := context.Background()
 		bqClient, err := bigquery.NewClient(ctx, config.BigQueryConfig.ProjectId, option.WithCredentialsJSON([]byte(serviceAccountCredential)))
 		if err != nil {
-			panic(err)
+			return err
 		}
 		defer bqClient.Close()
 
 		u := bqClient.Dataset(config.BigQueryConfig.Dataset).Table(config.BigQueryConfig.Table).Inserter()
 		err = u.Put(ctx, itemsForBq)
 		if err != nil {
-			panic(err)
+			return err
 		}
 	}
 
