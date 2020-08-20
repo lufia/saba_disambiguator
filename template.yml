@@ -1,6 +1,9 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: Create Lambda function by using AWS SAM.
+Parameters:
+  LambdaSabaDisambiguatorRuleName:
+    Type: String
 Resources:
   LambdaSabaDisambiguator:
     Type: AWS::Serverless::Function
@@ -46,7 +49,7 @@ Resources:
   LambdaSabaDisambiguatorRule:
     Type: AWS::Events::Rule
     Properties:
-      Name: MackerelSocialNextCron
+      Name: !Ref LambdaSabaDisambiguatorRuleName
       ScheduleExpression: rate(5 minutes)
       Targets:
         - Id: LambdaSabaDisambiguator
