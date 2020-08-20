@@ -30,6 +30,7 @@ type Config struct {
 	SlackConfig    SlackConfig    `yaml:"slack"`
 	BigQueryConfig BigQueryConfig `yaml:"bigquery"`
 	Query          string         `yaml:"query"`
+	Region         string         `yaml:"region"`
 }
 
 func GetConfigFromFile(configPath string) (*Config, error) {

@@ -107,7 +107,7 @@ func DoDisambiguate() error {
 		return err
 	}
 	svc := ssm.New(session.New(), &aws.Config{
-		Region: aws.String("ap-northeast-1"),
+		Region: aws.String(config.Region),
 	})
 
 	twitterConfig, err := getTwitterConfig(svc, *config)
