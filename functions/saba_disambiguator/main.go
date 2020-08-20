@@ -35,6 +35,11 @@ type TwitterConfig struct {
 	AccessSecret   string
 }
 
+type SlackConfig struct {
+	WebhookUrlPositive string
+	WebhookUrlNegative string
+}
+
 func getValueFromParameterStore(svc *ssm.SSM, name string) (string, error) {
 	res, err := svc.GetParameter(&ssm.GetParameterInput{
 		Name:           aws.String(name),
@@ -75,6 +80,24 @@ func getTwitterConfig(svc *ssm.SSM, config sabadisambiguator.Config) (TwitterCon
 	twitterConfig.AccessSecret = accessSecret
 
 	return twitterConfig, nil
+}
+
+func getSlackConfig(svc *ssm.SSM, config sabadisambiguator.Config) (SlackConfig, error) {
+	slackConfig := SlackConfig{}
+
+	webhookUrlPositive, err := getValueFromParameterStore(svc, config.SlackConfig.ParameterStoreNameWebhookUrlPositive)
+	if err != nil {
+		return slackConfig, err
+	}
+	slackConfig.WebhookUrlPositive = webhookUrlPositive
+
+	webhookUrlNegative, err := getValueFromParameterStore(svc, config.SlackConfig.ParameterStoreNameWebhookUrlNegative)
+	if err != nil {
+		return slackConfig, err
+	}
+	slackConfig.WebhookUrlNegative = webhookUrlNegative
+
+	return slackConfig, nil
 }
 
 func DoDisambiguate() error {
@@ -155,12 +178,12 @@ func DoDisambiguate() error {
 
 		if predLabel == sabadisambiguator.POSITIVE {
 			fmt.Fprintf(os.Stderr, "%s\n", tweetPermalink)
-			err := slack.Send(config.SlackConfig.WebhookUrlPositive, "", payload)
+			err := slack.Send(slackConfig.WebhookUrlPositive, "", payload)
 			if err != nil {
 				panic(err)
 			}
-		} else if (predLabel == sabadisambiguator.NEGATIVE) && (config.SlackConfig.WebhookUrlNegative != "") {
-			err := slack.Send(config.SlackConfig.WebhookUrlNegative, "", payload)
+		} else if (predLabel == sabadisambiguator.NEGATIVE) && (slackConfig.WebhookUrlNegative != "") {
+			err := slack.Send(slackConfig.WebhookUrlNegative, "", payload)
 			if err != nil {
 				panic(err)
 			}
