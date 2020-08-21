@@ -1,5 +1,6 @@
 AWSCMD=aws cloudformation
 BUCKET_NAME ?= saba-disambiguator
+S3_PREFIX ?= saba-disambiguator
 STACK_NAME ?= saba-disambiguator
 Lambda_Saba_Disambiguator_Rule_Name ?= MackerelSocialNextCron
 
@@ -37,6 +38,7 @@ sam-package:
 	${AWSCMD} package \
 		--template-file template.yml \
 		--s3-bucket ${BUCKET_NAME} \
+		--s3-prefix ${S3_PREFIX} \
 		--output-template-file sam.yml \
 
 sam-deploy:
