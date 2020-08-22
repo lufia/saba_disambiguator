@@ -1,6 +1,11 @@
 package sabadisambiguator
 
-import "math"
+import (
+	"math"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/ssm"
+)
 
 func splitTrainAndDev(examples Examples) (train Examples, dev Examples) {
 	shuffle(examples)
@@ -34,4 +39,16 @@ func overSampling(examples Examples) Examples {
 	}
 	shuffle(result)
 	return result
+}
+
+func GetValueFromParameterStore(svc *ssm.SSM, name string) (string, error) {
+	res, err := svc.GetParameter(&ssm.GetParameterInput{
+		Name:           aws.String(name),
+		WithDecryption: aws.Bool(true),
+	})
+	if err != nil {
+		return "", err
+	}
+	val := *res.Parameter.Value
+	return val, nil
 }
