@@ -1,8 +1,15 @@
-twitter:
-  consumerKey: "consumerKey"
-  consumerSecret: "consumerSecret"
-  aceessToken: "aceessToken"
-  accessSecret: "accessSecret"
-slack:
-  webhookUrlPositive: "webhookUrlPositive"
-  webhookUrlNegative: "webhookUrlNegative"
+query: "mackerel lang:ja exclude:retweets"
+region: "ap-northeast-1"
+twitter: # Twitterから情報を取得するためのシークレットキーが保存されているAWSパラメータストアの名前を書きます
+  parameterStoreNameConsumerKey: "/path/to/ConsumerKey"
+  parameterStoreNameConsumerSecret: "/path/to/ConsumerSecret"
+  parameterStoreNameAccessToken: "/path/to/AccessToken"
+  parameterStoreNameAccessSecret: "/path/to/AccessSecret"
+slack: # slackに投稿するincomming hookの情報が保存されているAWSパラメータストアの名前を書きます
+  parameterStoreNameWebhookUrlPositive: "/path/to/WebhookUrlPositive" # 正例用のチャンネル
+  parameterStoreNameWebhookUrlNegative: "/path/to/WebhookUrlNegative" # 負例用のチャンネル
+bigquery:
+  parameterStoreNameServiceAccountCredential: "/path/to/ServiceAccountCredential" # BigQueryにデータを保存したい場合、GCPのサービスアカウントのJSONが保存されているAWSパラメータストアの名前を書きます
+  projectId: my-project
+  dataset: my_dataset
+  table: my_table 

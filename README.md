@@ -33,11 +33,7 @@ https://twitter.com/mackerelio_jp/status/931369140534747137
 
 # AWS Lambdaで動かす
 ## 設定ファイル
-動かす前に設定が必要です。設定は`functions/saba_disambiguator/build/config.yml`に書きます。`functions/saba_disambiguator/build/config_sample.yml`にサンプルがあるので、それを参考にするとよいでしょう。
-
-- `TWITTER_*`はTwitterの検索結果を取得するために必要です
-- `SLACK_TOKEN`はSlackへの投稿に必要です。正例であると判定されたtweetは`SLACK_CHANNEL_NAME`に投稿されます
-  - debug用に負例と判定されたtweetも知りたい場合は、`SLACK_CHANNEL_NAME_NEGATIVE`を設定しておけば負例もそのチャンネルに投稿されます
+動かす前に設定が必要です。設定は`functions/saba_disambiguator/build/config.yml`に書きます。`functions/saba_disambiguator/build/config_sample.yml`にサンプルがあるので、それを参考にするとよいでしょう。secretキーなどはリポジトリで管理したくない情報なので、[AWS Systems Manager パラメータストア](https://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/systems-manager-parameter-store.html)で管理します
 
 ## Deeploy
 AWS Lambdaへのdeployは[SAM](https://aws.amazon.com/jp/serverless/sam/)を使います。以下のコマンドでdeployできます。
