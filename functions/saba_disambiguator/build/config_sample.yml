@@ -1,8 +1,15 @@
+query: "mackerel lang:ja exclude:retweets"
+region: "ap-northeast-1"
 twitter:
-  consumerKey: "consumerKey"
-  consumerSecret: "consumerSecret"
-  aceessToken: "aceessToken"
-  accessSecret: "accessSecret"
+  parameterStoreNameConsumerKey: "/path/to/ConsumerKey"
+  parameterStoreNameConsumerSecret: "/path/to/ConsumerSecret"
+  parameterStoreNameAccessToken: "/path/to/AccessToken"
+  parameterStoreNameAccessSecret: "/path/to/AccessSecret"
 slack:
-  webhookUrlPositive: "webhookUrlPositive"
-  webhookUrlNegative: "webhookUrlNegative"
+  parameterStoreNameWebhookUrlPositive: "/path/to/WebhookUrlPositive"
+  parameterStoreNameWebhookUrlNegative: "/path/to/WebhookUrlNegative"
+bigquery:
+  parameterStoreNameServiceAccountCredential: "/path/to/ServiceAccountCredential"
+  projectId: my-project
+  dataset: my_dataset
+  table: my_table 
