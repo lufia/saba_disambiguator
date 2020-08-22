@@ -10,14 +10,14 @@ require (
 	github.com/aws/aws-sdk-go v1.34.9
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/dghubble/go-twitter v0.0.0-20200725221434-4bc8ad7ad1b4
-	github.com/dghubble/oauth1 v0.6.0
+	github.com/dghubble/oauth1 v0.6.0 // indirect
 	github.com/elazarl/goproxy v0.0.0-20200809112317-0581fc3aee2d // indirect
 	github.com/ikawaha/kagome.ipadic v1.1.2 // indirect
 	github.com/parnurzeal/gorequest v0.2.16 // indirect
 	github.com/smartystreets/goconvey v1.6.4 // indirect
-	github.com/syou6162/saba_disambiguator v0.0.0-20200820211607-7dd82d559a58
-	golang.org/x/sys v0.0.0-20200819171115-d785dc25833f // indirect
-	golang.org/x/tools v0.0.0-20200820180210-c8f393745106 // indirect
+	github.com/syou6162/saba_disambiguator v0.0.0-20200822095207-579d2bb96da0
+	golang.org/x/sys v0.0.0-20200821140526-fda516888d29 // indirect
+	golang.org/x/tools v0.0.0-20200821200730-1e23e48ab93b // indirect
 	google.golang.org/api v0.30.0
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 	moul.io/http2curl v1.0.0 // indirect
