@@ -2,7 +2,7 @@ AWSCMD=aws cloudformation
 BUCKET_NAME ?= saba-disambiguator
 S3_PREFIX ?= saba-disambiguator
 STACK_NAME ?= saba-disambiguator
-Lambda_Saba_Disambiguator_Rule_Name ?= MackerelSocialNextCron
+LAMBDA_SABA_DISAMBIGUATOR_RULE_NAME ?= MackerelSocialNextCron
 
 import-pos:
 	touch _pos.json pos.json && cat _pos.json pos.json | jq -r .id_str > pos_cache_ids
@@ -45,7 +45,7 @@ sam-deploy:
 	${AWSCMD} deploy \
 		--template-file sam.yml \
 		--stack-name ${STACK_NAME} \
-		--parameter-overrides LambdaSabaDisambiguatorRuleName=${Lambda_Saba_Disambiguator_Rule_Name} \
+		--parameter-overrides LambdaSabaDisambiguatorRuleName=${LAMBDA_SABA_DISAMBIGUATOR_RULE_NAME} \
 		--capabilities CAPABILITY_IAM
 
 .PHONY: import learn sam-package sam-deploy
