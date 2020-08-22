@@ -12,8 +12,9 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/dghubble/go-twitter/twitter"
-	"github.com/dghubble/oauth1"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ssm"
 	sabadisambiguator "github.com/syou6162/saba_disambiguator/lib"
 )
 
@@ -49,15 +50,14 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	token := oauth1.NewToken(
-		config.TwitterConfig.AceessToken,
-		config.TwitterConfig.AccessSecret,
-	)
-	httpClient := oauth1.NewConfig(
-		config.TwitterConfig.ConsumerKey,
-		config.TwitterConfig.ConsumerSecret,
-	).Client(oauth1.NoContext, token)
-	client := twitter.NewClient(httpClient)
+	svc := ssm.New(session.New(), &aws.Config{
+		Region: aws.String(config.Region),
+	})
+
+	client, err := sabadisambiguator.GetTwitterClient(svc, *config)
+	if err != nil {
+		panic(err)
+	}
 
 	cachedIds, err := cacheIdsFromFile(os.Args[1])
 	if err != nil {
