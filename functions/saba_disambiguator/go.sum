@@ -55,6 +55,8 @@ github.com/aws/aws-sdk-go v1.34.9 h1:cUGBW9CVdi0mS7K1hDzxIqTpfeWhpoQiguq81M1tjK0
 github.com/aws/aws-sdk-go v1.34.9/go.mod h1:5zCpMtNQVjRREroY7sYe8lOMRSxkhG6MZveU8YkpAk0=
 github.com/aws/aws-sdk-go v1.34.10 h1:VU78gcf/3wA4HNEDCHidK738l7K0Bals4SJnfnvXOtY=
 github.com/aws/aws-sdk-go v1.34.10/go.mod h1:5zCpMtNQVjRREroY7sYe8lOMRSxkhG6MZveU8YkpAk0=
+github.com/aws/aws-sdk-go v1.34.27 h1:qBqccUrlz43Zermh0U1O502bHYZsgMlBm+LUVabzBPA=
+github.com/aws/aws-sdk-go v1.34.27/go.mod h1:5zCpMtNQVjRREroY7sYe8lOMRSxkhG6MZveU8YkpAk0=
 github.com/cenkalti/backoff v2.1.1+incompatible h1:tKJnvO2kl0zmb/jA5UKAt4VoEVw1qxKWjE/Bpp46npY=
 github.com/cenkalti/backoff v2.1.1+incompatible/go.mod h1:90ReRw6GdpyfrHakVjL/QHaoyV4aDUVVkXQJJJ3NXXM=
 github.com/cenkalti/backoff v2.2.1+incompatible h1:tNowT99t7UNflLxfYYSlKYsBpXdEet03Pg2g16Swow4=
