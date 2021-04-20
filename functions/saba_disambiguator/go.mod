@@ -15,7 +15,7 @@ require (
 	github.com/parnurzeal/gorequest v0.2.16 // indirect
 	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/syou6162/saba_disambiguator v0.0.0-20200822095207-579d2bb96da0
-	google.golang.org/api v0.43.0
+	google.golang.org/api v0.45.0
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 	moul.io/http2curl v1.0.0 // indirect
 )
