@@ -7,6 +7,8 @@ import (
 	"os"
 	"time"
 
+	sabadisambiguator "saba_disambiguator/lib"
+
 	"cloud.google.com/go/bigquery"
 	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -14,7 +16,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ssm"
 	"github.com/dghubble/go-twitter/twitter"
-	sabadisambiguator "github.com/syou6162/saba_disambiguator/lib"
 	"google.golang.org/api/option"
 )
 
