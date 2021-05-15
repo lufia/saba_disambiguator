@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/bigquery v1.16.0
 	github.com/ashwanthkumar/slack-go-webhook v0.0.0-20200209025033-430dd4e66960
 	github.com/aws/aws-lambda-go v1.23.0
-	github.com/aws/aws-sdk-go v1.35.33
+	github.com/aws/aws-sdk-go v1.38.40
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/dghubble/go-twitter v0.0.0-20201011215211-4b180d0cc78d
 	github.com/dghubble/oauth1 v0.6.0 // indirect
