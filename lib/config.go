@@ -31,6 +31,7 @@ type Config struct {
 	BigQueryConfig BigQueryConfig `yaml:"bigquery"`
 	Query          string         `yaml:"query"`
 	Region         string         `yaml:"region"`
+	ScreenNames    []string       `yaml:"screenNames"`
 }
 
 func GetConfigFromFile(configPath string) (*Config, error) {
