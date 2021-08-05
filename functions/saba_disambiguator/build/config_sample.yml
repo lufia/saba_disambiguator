@@ -13,3 +13,6 @@ bigquery:
   projectId: my-project
   dataset: my_dataset
   table: my_table 
+screenNames:
+  - mackerelio
+  - mackerelio_jp

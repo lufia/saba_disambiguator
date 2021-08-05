@@ -34,24 +34,6 @@ func inReplyToScreenName(t twitter.Tweet) string {
 	return t.InReplyToScreenName
 }
 
-func containsMackerelInScreenName(screenName string) bool {
-	return strings.Contains(strings.ToLower(screenName), "mackerel")
-}
-
-func includeMackerelInUserMentions(t twitter.Tweet) bool {
-	result := false
-	for _, m := range t.Entities.UserMentions {
-		if containsMackerelInScreenName(m.ScreenName) {
-			return true
-		}
-	}
-	return result
-}
-
-func includeMackerelInReplyToScreenName(t twitter.Tweet) bool {
-	return containsMackerelInScreenName(t.InReplyToScreenName)
-}
-
 func lang(t twitter.Tweet) string {
 	return t.Lang
 }
@@ -129,7 +111,45 @@ func hashtagsInEntities(t twitter.Tweet) FeatureVector {
 	return fv
 }
 
+type ExtractOptions struct {
+	ScreenNames []string
+}
+
+func (opts *ExtractOptions) contains(screenName string) bool {
+	screenName = strings.ToLower(screenName)
+
+	// for backward compatibility
+	if len(opts.ScreenNames) == 0 {
+		return strings.Contains(screenName, "mackerel")
+	}
+
+	for _, s := range opts.ScreenNames {
+		if s == screenName {
+			return true
+		}
+	}
+	return false
+}
+
+func (opts *ExtractOptions) includeScreenNameInUserMentions(t twitter.Tweet) bool {
+	result := false
+	for _, m := range t.Entities.UserMentions {
+		if opts.contains(m.ScreenName) {
+			return true
+		}
+	}
+	return result
+}
+
+func (opts *ExtractOptions) includeScreenNameInReplyToScreenName(t twitter.Tweet) bool {
+	return opts.contains(t.InReplyToScreenName)
+}
+
 func ExtractFeatures(t twitter.Tweet) FeatureVector {
+	return ExtractFeaturesWithOptions(t, ExtractOptions{})
+}
+
+func ExtractFeaturesWithOptions(t twitter.Tweet, opts ExtractOptions) FeatureVector {
 	var fv FeatureVector
 	text := t.Text
 
@@ -138,9 +158,9 @@ func ExtractFeatures(t twitter.Tweet) FeatureVector {
 	fv = append(fv, "inReplyToScreenName:"+inReplyToScreenName(t))
 	fv = append(fv, "screenNameInQuotedStatus"+screenNameInQuotedStatus(t))
 	fv = append(fv, "lang:"+lang(t))
-	fv = append(fv, "containsMackerelInScreenName:"+strconv.FormatBool(containsMackerelInScreenName(t.User.ScreenName)))
-	fv = append(fv, "includeMackerelInUserMentions:"+strconv.FormatBool(includeMackerelInUserMentions(t)))
-	fv = append(fv, "includeMackerelInReplyToScreenName:"+strconv.FormatBool(includeMackerelInReplyToScreenName(t)))
+	fv = append(fv, "containsMackerelInScreenName:"+strconv.FormatBool(opts.contains(t.User.ScreenName)))
+	fv = append(fv, "includeMackerelInUserMentions:"+strconv.FormatBool(opts.includeScreenNameInUserMentions(t)))
+	fv = append(fv, "includeMackerelInReplyToScreenName:"+strconv.FormatBool(opts.includeScreenNameInReplyToScreenName(t)))
 
 	fv = append(fv, ExtractNounFeatures(text, "Text")...)
 	fv = append(fv, extractNounFeaturesFromQuotedText(t)...)

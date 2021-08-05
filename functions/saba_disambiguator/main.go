@@ -106,7 +106,9 @@ func DoDisambiguate() error {
 		if err != nil {
 			return err
 		}
-		fv := sabadisambiguator.ExtractFeatures(t)
+		fv := sabadisambiguator.ExtractFeaturesWithOptions(t, sabadisambiguator.ExtractOptions{
+			ScreenNames: config.ScreenNames,
+		})
 		score := model.PredictScore(fv)
 		predLabel := model.Predict(fv)
 		item := ItemForBigQuery{
