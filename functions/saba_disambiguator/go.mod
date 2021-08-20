@@ -1,4 +1,4 @@
-module main
+module github.com/syou6162/saba_disambiguator/functions/saba_disambiguator
 
 go 1.16
 
