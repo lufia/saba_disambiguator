@@ -1,4 +1,4 @@
-module main
+module github.com/syou6162/saba_disambiguator/functions/saba_disambiguator
 
 go 1.16
 
@@ -12,6 +12,7 @@ require (
 	github.com/elazarl/goproxy v0.0.0-20200809112317-0581fc3aee2d // indirect
 	github.com/parnurzeal/gorequest v0.2.16 // indirect
 	github.com/smartystreets/goconvey v1.6.4 // indirect
+	github.com/syou6162/saba_disambiguator v0.0.3 // indirect
 	google.golang.org/api v0.46.0
 	moul.io/http2curl v1.0.0 // indirect
 	saba_disambiguator v0.0.1

@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	sabadisambiguator "saba_disambiguator/lib"
+	sabadisambiguator "github.com/syou6162/saba_disambiguator/lib"
 
 	"cloud.google.com/go/bigquery"
 	"github.com/ashwanthkumar/slack-go-webhook"
