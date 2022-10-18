@@ -35,7 +35,7 @@ https://twitter.com/mackerelio_jp/status/931369140534747137
 ## 設定ファイル
 動かす前に設定が必要です。設定は`functions/saba_disambiguator/build/config.yml`に書きます。`functions/saba_disambiguator/build/config_sample.yml`にサンプルがあるので、それを参考にするとよいでしょう。secretキーなどはリポジトリで管理したくない情報なので、[AWS Systems Manager パラメータストア](https://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/systems-manager-parameter-store.html)で管理します
 
-## Deeploy
+## Deploy
 AWS Lambdaへのdeployは[SAM](https://aws.amazon.com/jp/serverless/sam/)を使います。以下のコマンドでdeployできます。
 
 ```
