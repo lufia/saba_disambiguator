@@ -3,7 +3,7 @@ module github.com/syou6162/saba_disambiguator
 go 1.19
 
 require (
-	github.com/aws/aws-sdk-go v1.44.120
+	github.com/aws/aws-sdk-go v1.44.121
 	github.com/dghubble/go-twitter v0.0.0-20220816163853-8a0df96f1e6d
 	github.com/dghubble/oauth1 v0.7.1
 	github.com/ikawaha/kagome.ipadic v1.1.2
