@@ -69,10 +69,6 @@ func main() {
 
 	stdin := bufio.NewScanner(os.Stdin)
 	for stdin.Scan() {
-		if err := stdin.Err(); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-		}
-
 		text := stdin.Text()
 		id, err := parseLine(text)
 		if err != nil {
@@ -91,5 +87,8 @@ func main() {
 
 		tweetJson, _ := json.Marshal(tweet)
 		fmt.Println(string(tweetJson))
+	}
+	if err := stdin.Err(); err != nil {
+		log.Fatalln(err)
 	}
 }
