@@ -4,6 +4,8 @@ S3_PREFIX ?= saba-disambiguator
 STACK_NAME ?= saba-disambiguator
 LAMBDA_SABA_DISAMBIGUATOR_RULE_NAME ?= MackerelSocialNextCron
 
+export CGO_ENABLED := 0
+
 import-pos:
 	touch _pos.json pos.json && cat _pos.json pos.json | jq -r .id_str > pos_cache_ids
 	cat data/pos.txt | go run import_json.go pos_cache_ids | tee -a _pos.json
