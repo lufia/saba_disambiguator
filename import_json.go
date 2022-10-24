@@ -6,6 +6,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -47,9 +48,10 @@ func cacheIdsFromFile(filename string) (map[int64]struct{}, error) {
 }
 
 func main() {
+	log.SetFlags(0)
 	config, err := sabadisambiguator.GetConfigFromFile("functions/saba_disambiguator/build/config.yml")
 	if err != nil {
-		panic(err)
+		log.Fatalf("failed to load config: %v\n", err)
 	}
 	svc := ssm.New(session.New(), &aws.Config{
 		Region: aws.String(config.Region),
@@ -57,12 +59,12 @@ func main() {
 
 	client, err := sabadisambiguator.GetTwitterClient(svc, *config)
 	if err != nil {
-		panic(err)
+		log.Fatalf("failed to get Twitter client: %v\n", err)
 	}
 
 	cachedIds, err := cacheIdsFromFile(os.Args[1])
 	if err != nil {
-		panic(err)
+		log.Fatalf("failed to read cache: %v\n", err)
 	}
 
 	stdin := bufio.NewScanner(os.Stdin)
@@ -83,8 +85,7 @@ func main() {
 		time.Sleep(1 * time.Second)
 		tweet, resp, err := client.Statuses.Show(id, nil)
 		if resp.StatusCode != 200 {
-			fmt.Fprintln(os.Stderr, resp)
-			fmt.Fprintln(os.Stderr, err)
+			log.Printf("failed to get tweet %s: status=%d, %v\n", text, resp.StatusCode, err)
 			continue
 		}
 

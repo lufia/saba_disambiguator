@@ -6,6 +6,7 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"log"
 	"os"
 
 	"github.com/dghubble/go-twitter/twitter"
@@ -45,14 +46,15 @@ func readExamplesFromFile(fileName string, label sabadisambiguator.LabelType) (s
 }
 
 func main() {
+	log.SetFlags(0)
 	examplesPos, err := readExamplesFromFile(os.Args[1], sabadisambiguator.POSITIVE)
 	if err != nil {
-		panic(err)
+		log.Fatalf("failed to read %s: %v\n", os.Args[1], err)
 	}
 
 	examplesNeg, err := readExamplesFromFile(os.Args[2], sabadisambiguator.NEGATIVE)
 	if err != nil {
-		panic(err)
+		log.Fatalf("failed to read %s: %v\n", os.Args[2], err)
 	}
 
 	examples := append(examplesPos, examplesNeg...)
