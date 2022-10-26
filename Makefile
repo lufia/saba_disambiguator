@@ -6,29 +6,36 @@ LAMBDA_SABA_DISAMBIGUATOR_RULE_NAME ?= MackerelSocialNextCron
 
 export CGO_ENABLED := 0
 
+.PHONY: import-pos
 import-pos:
 	touch _pos.json pos.json && cat _pos.json pos.json | jq -r .id_str > pos_cache_ids
 	cat data/pos.txt | go run import_json.go pos_cache_ids | tee -a _pos.json
 	cat _pos.json | jq --slurp --compact-output 'unique_by(.id_str) | .[]' > pos.json
 	
+.PHONY: import-neg
 import-neg:
 	touch _neg.json neg.json && cat _neg.json neg.json | jq -r .id_str > neg_cache_ids
 	cat data/neg.txt | go run import_json.go neg_cache_ids | tee -a _neg.json
 	cat _neg.json | jq --slurp --compact-output 'unique_by(.id_str) | .[]' > neg.json
 
+.PHONY: import
 import:
 	@make import-pos import-neg
 
+.PHONY: clean
 clean:
 	rm _neg.json _pos.json neg.json neg_cache_ids pos.json pos_cache_ids
 
+.PHONY: learn
 learn:
 	go run train_perceptron.go pos.json neg.json
 
+.PHONY: format
 format:
 	gofmt -w functions/**/*.go lib/*.go *.go
 	goimports -w functions/**/*.go lib/*.go *.go
 
+.PHONY: sam-package
 sam-package:
 	cd functions/saba_disambiguator; GOARCH=amd64 GOOS=linux go build -o build/saba_disambiguator main.go
 	if aws s3 ls "s3://${BUCKET_NAME}" 2>&1 | grep -q 'AccessDenied'; then \
@@ -43,11 +50,10 @@ sam-package:
 		--s3-prefix ${S3_PREFIX} \
 		--output-template-file sam.yml \
 
+.PHONY: sam-deploy
 sam-deploy:
 	${AWSCMD} deploy \
 		--template-file sam.yml \
 		--stack-name ${STACK_NAME} \
 		--parameter-overrides LambdaSabaDisambiguatorRuleName=${LAMBDA_SABA_DISAMBIGUATOR_RULE_NAME} \
 		--capabilities CAPABILITY_IAM
-
-.PHONY: import learn sam-package sam-deploy
