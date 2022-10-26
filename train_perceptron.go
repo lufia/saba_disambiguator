@@ -13,6 +13,8 @@ import (
 	sabadisambiguator "github.com/syou6162/saba_disambiguator/lib"
 )
 
+var config *sabadisambiguator.Config
+
 func parseLine(line string) (twitter.Tweet, error) {
 	var tweet twitter.Tweet
 	err := json.Unmarshal([]byte(line), &tweet)
@@ -36,7 +38,9 @@ func readExamplesFromFile(fileName string, label sabadisambiguator.LabelType) (s
 			continue
 		}
 
-		e := sabadisambiguator.NewExample(t, label)
+		e := sabadisambiguator.NewExampleWithOptions(t, label, sabadisambiguator.ExtractOptions{
+			ScreenNames: config.ScreenNames,
+		})
 		examples = append(examples, e)
 	}
 	if err := scanner.Err(); err != nil {
@@ -47,6 +51,13 @@ func readExamplesFromFile(fileName string, label sabadisambiguator.LabelType) (s
 
 func main() {
 	log.SetFlags(0)
+
+	cfg, err := sabadisambiguator.GetConfigFromFile("functions/saba_disambiguator/build/config.yml")
+	if err != nil {
+		log.Fatalf("failed to load config: %v\n", err)
+	}
+	config = cfg
+
 	examplesPos, err := readExamplesFromFile(os.Args[1], sabadisambiguator.POSITIVE)
 	if err != nil {
 		log.Fatalf("failed to read %s: %v\n", os.Args[1], err)
