@@ -145,10 +145,6 @@ func (opts *ExtractOptions) includeScreenNameInReplyToScreenName(t twitter.Tweet
 	return opts.contains(t.InReplyToScreenName)
 }
 
-func ExtractFeatures(t twitter.Tweet) FeatureVector {
-	return ExtractFeaturesWithOptions(t, ExtractOptions{})
-}
-
 func ExtractFeaturesWithOptions(t twitter.Tweet, opts ExtractOptions) FeatureVector {
 	var fv FeatureVector
 	text := t.Text
