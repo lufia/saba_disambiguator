@@ -24,7 +24,7 @@ import:
 
 .PHONY: clean
 clean:
-	rm _neg.json _pos.json neg.json neg_cache_ids pos.json pos_cache_ids
+	rm -f _neg.json _pos.json neg.json neg_cache_ids pos.json pos_cache_ids
 
 .PHONY: learn
 learn:
