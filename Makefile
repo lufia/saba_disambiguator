@@ -9,13 +9,13 @@ export CGO_ENABLED := 0
 .PHONY: import-pos
 import-pos:
 	touch _pos.json pos.json && cat _pos.json pos.json | jq -r .id_str > pos_cache_ids
-	cat data/pos.txt | go run import_json.go pos_cache_ids | tee -a _pos.json
+	go run import_json.go -a _pos.json pos_cache_ids <data/pos.txt
 	cat _pos.json | jq --slurp --compact-output 'unique_by(.id_str) | .[]' > pos.json
 	
 .PHONY: import-neg
 import-neg:
 	touch _neg.json neg.json && cat _neg.json neg.json | jq -r .id_str > neg_cache_ids
-	cat data/neg.txt | go run import_json.go neg_cache_ids | tee -a _neg.json
+	go run import_json.go -a _neg.json neg_cache_ids <data/neg.txt
 	cat _neg.json | jq --slurp --compact-output 'unique_by(.id_str) | .[]' > neg.json
 
 .PHONY: import
