@@ -8,7 +8,7 @@ require (
 	github.com/aws/aws-lambda-go v1.34.1
 	github.com/aws/aws-sdk-go v1.44.121
 	github.com/dghubble/go-twitter v0.0.0-20220816163853-8a0df96f1e6d
-	github.com/syou6162/saba_disambiguator v0.0.3
+	github.com/syou6162/saba_disambiguator v0.0.5
 	google.golang.org/api v0.99.0
 )
 
@@ -17,7 +17,7 @@ require (
 	cloud.google.com/go/compute v1.10.0 // indirect
 	cloud.google.com/go/iam v0.3.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
-	github.com/dghubble/oauth1 v0.7.0 // indirect
+	github.com/dghubble/oauth1 v0.7.1 // indirect
 	github.com/dghubble/sling v1.4.0 // indirect
 	github.com/elazarl/goproxy v0.0.0-20200809112317-0581fc3aee2d // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
