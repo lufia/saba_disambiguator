@@ -49,14 +49,25 @@ func readExamplesFromFile(fileName string, label sabadisambiguator.LabelType) (s
 	return examples, nil
 }
 
+func loadConfig(file string) (*sabadisambiguator.Config, error) {
+	c, err := sabadisambiguator.GetConfigFromFile(file)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return &sabadisambiguator.Config{}, nil
+		}
+		return nil, err
+	}
+	return c, nil
+}
+
 func main() {
 	log.SetFlags(0)
 
-	cfg, err := sabadisambiguator.GetConfigFromFile("functions/saba_disambiguator/build/config.yml")
+	c, err := loadConfig("functions/saba_disambiguator/build/config.yml")
 	if err != nil {
 		log.Fatalf("failed to load config: %v\n", err)
 	}
-	config = cfg
+	config = c
 
 	examplesPos, err := readExamplesFromFile(os.Args[1], sabadisambiguator.POSITIVE)
 	if err != nil {
