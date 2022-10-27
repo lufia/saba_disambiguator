@@ -145,10 +145,6 @@ func (opts *ExtractOptions) includeScreenNameInReplyToScreenName(t twitter.Tweet
 	return opts.contains(t.InReplyToScreenName)
 }
 
-func ExtractFeatures(t twitter.Tweet) FeatureVector {
-	return ExtractFeaturesWithOptions(t, ExtractOptions{})
-}
-
 func ExtractFeaturesWithOptions(t twitter.Tweet, opts ExtractOptions) FeatureVector {
 	var fv FeatureVector
 	text := t.Text
@@ -156,7 +152,7 @@ func ExtractFeaturesWithOptions(t twitter.Tweet, opts ExtractOptions) FeatureVec
 	fv = append(fv, "BIAS")
 	fv = append(fv, "ScreenName:"+t.User.ScreenName)
 	fv = append(fv, "inReplyToScreenName:"+inReplyToScreenName(t))
-	fv = append(fv, "screenNameInQuotedStatus"+screenNameInQuotedStatus(t))
+	fv = append(fv, "screenNameInQuotedStatus:"+screenNameInQuotedStatus(t))
 	fv = append(fv, "lang:"+lang(t))
 	fv = append(fv, "containsMackerelInScreenName:"+strconv.FormatBool(opts.contains(t.User.ScreenName)))
 	fv = append(fv, "includeMackerelInUserMentions:"+strconv.FormatBool(opts.includeScreenNameInUserMentions(t)))

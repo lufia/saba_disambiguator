@@ -5,7 +5,9 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"strings"
@@ -47,12 +49,27 @@ func cacheIdsFromFile(filename string) (map[int64]struct{}, error) {
 	return cachedIds, nil
 }
 
+var flagAppend = flag.String("a", "", "append new tweets to `file`")
+
+type WriteSyncer interface {
+	io.Writer
+	Sync() error
+}
+
+type nopWriter struct{}
+
+func (*nopWriter) Write(p []byte) (int, error) { return len(p), nil }
+func (*nopWriter) Sync() error                 { return nil }
+
 func main() {
 	log.SetFlags(0)
+	flag.Parse()
+
 	config, err := sabadisambiguator.GetConfigFromFile("functions/saba_disambiguator/build/config.yml")
 	if err != nil {
 		log.Fatalf("failed to load config: %v\n", err)
 	}
+
 	svc := ssm.New(session.New(), &aws.Config{
 		Region: aws.String(config.Region),
 	})
@@ -62,9 +79,19 @@ func main() {
 		log.Fatalf("failed to get Twitter client: %v\n", err)
 	}
 
-	cachedIds, err := cacheIdsFromFile(os.Args[1])
+	cachedIds, err := cacheIdsFromFile(flag.Arg(0))
 	if err != nil {
 		log.Fatalf("failed to read cache: %v\n", err)
+	}
+
+	var w WriteSyncer = &nopWriter{}
+	if *flagAppend != "" {
+		f, err := os.OpenFile(*flagAppend, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+		if err != nil {
+			log.Fatalf("failed to open '%s': %v\n", *flagAppend, err)
+		}
+		defer f.Close()
+		w = f
 	}
 
 	stdin := bufio.NewScanner(os.Stdin)
@@ -87,8 +114,12 @@ func main() {
 
 		tweetJson, _ := json.Marshal(tweet)
 		fmt.Println(string(tweetJson))
+		fmt.Fprintln(w, string(tweetJson))
 	}
 	if err := stdin.Err(); err != nil {
 		log.Fatalln(err)
+	}
+	if err := w.Sync(); err != nil {
+		log.Fatalf("failed to flush tweets: %v\n", err)
 	}
 }

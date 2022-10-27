@@ -21,8 +21,8 @@ type Example struct {
 
 type Examples []*Example
 
-func NewExample(tweet twitter.Tweet, label LabelType) *Example {
-	fv := ExtractFeatures(tweet)
+func NewExampleWithOptions(tweet twitter.Tweet, label LabelType, opts ExtractOptions) *Example {
+	fv := ExtractFeaturesWithOptions(tweet, opts)
 	return &Example{Label: label, Fv: fv, Tweet: tweet}
 }
 
