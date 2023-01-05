@@ -70,7 +70,13 @@ func main() {
 		log.Fatalf("failed to load config: %v\n", err)
 	}
 
-	svc := ssm.New(session.New(), &aws.Config{
+	sess, err := session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	})
+	if err != nil {
+		log.Fatalf("failed to get session: %v\n", err)
+	}
+	svc := ssm.New(sess, &aws.Config{
 		Region: aws.String(config.Region),
 	})
 
