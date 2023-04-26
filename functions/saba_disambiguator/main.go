@@ -194,10 +194,8 @@ func formatTweetIntoSlackPayload(t *twitter.Tweet) slack.Payload {
 						AltText:  t.User.ScreenName,
 					},
 					slack.TextObject{
-						Type: "mrkdwn",
-						// If t.User.Name contains '*', then bolding name will be broken.
-						// I don't know how to fix it, and it may be OK.
-						Text: fmt.Sprintf("*%s* @%s", t.User.Name, t.User.ScreenName),
+						Type: "plain_text",
+						Text: fmt.Sprintf("%s @%s", t.User.Name, t.User.ScreenName),
 					},
 				},
 			},
