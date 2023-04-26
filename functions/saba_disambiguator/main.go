@@ -1,16 +1,17 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
 	sabadisambiguator "github.com/syou6162/saba_disambiguator/lib"
 
 	"cloud.google.com/go/bigquery"
-	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -123,22 +124,20 @@ func DoDisambiguate() error {
 		itemsForBq = append(itemsForBq, &item)
 
 		tweetPermalink := fmt.Sprintf("https://twitter.com/%s/status/%s", t.User.ScreenName, t.IDStr)
-		payload := slack.Payload{
-			Text: tweetPermalink,
+		payload := map[string]string{
+			"text": tweetPermalink,
 		}
 		fmt.Println(tweetPermalink)
 
+		err = nil
 		if predLabel == sabadisambiguator.POSITIVE {
 			fmt.Fprintf(os.Stderr, "%s\n", tweetPermalink)
-			err := slack.Send(slackConfig.WebhookUrlPositive, "", payload)
-			if err != nil {
-				return err[0]
-			}
+			err = postJSON(slackConfig.WebhookUrlPositive, payload)
 		} else if (predLabel == sabadisambiguator.NEGATIVE) && (slackConfig.WebhookUrlNegative != "") {
-			err := slack.Send(slackConfig.WebhookUrlNegative, "", payload)
-			if err != nil {
-				return err[0]
-			}
+			err = postJSON(slackConfig.WebhookUrlNegative, payload)
+		}
+		if err != nil {
+			return err
 		}
 	}
 
@@ -159,6 +158,24 @@ func DoDisambiguate() error {
 		if err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func postJSON(url string, v any) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return fmt.Errorf("postjson: %w", err)
+	}
+
+	resp, err := http.Post(url, "application/json", bytes.NewReader(b))
+	if err != nil {
+		return fmt.Errorf("postjson: %w", err)
+	}
+
+	if resp.StatusCode >= 400 {
+		return fmt.Errorf("postjson: failed with status: %s", resp.Status)
 	}
 
 	return nil
