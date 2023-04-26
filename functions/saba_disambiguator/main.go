@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"time"
 
 	sabadisambiguator "github.com/syou6162/saba_disambiguator/lib"
@@ -18,6 +17,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ssm"
 	"github.com/dghubble/go-twitter/twitter"
+	"github.com/syou6162/saba_disambiguator/functions/saba_disambiguator/slack"
 	"google.golang.org/api/option"
 )
 
@@ -124,15 +124,10 @@ func DoDisambiguate() error {
 		}
 		itemsForBq = append(itemsForBq, &item)
 
-		tweetPermalink := fmt.Sprintf("https://twitter.com/%s/status/%s", t.User.ScreenName, t.IDStr)
-		payload := map[string]string{
-			"text": tweetPermalink,
-		}
-		fmt.Println(tweetPermalink)
+		payload := formatTweetIntoSlackPayload(&t)
 
 		err = nil
 		if predLabel == sabadisambiguator.POSITIVE {
-			fmt.Fprintf(os.Stderr, "%s\n", tweetPermalink)
 			err = postJSON(slackConfig.WebhookUrlPositive, payload)
 		} else if (predLabel == sabadisambiguator.NEGATIVE) && (slackConfig.WebhookUrlNegative != "") {
 			err = postJSON(slackConfig.WebhookUrlNegative, payload)
@@ -182,6 +177,48 @@ func postJSON(url string, v any) error {
 	}
 
 	return nil
+}
+
+func formatTweetIntoSlackPayload(t *twitter.Tweet) slack.Payload {
+	permalink := fmt.Sprintf("https://twitter.com/%s/status/%s", t.User.ScreenName, t.IDStr)
+
+	return slack.Payload{
+		Text: permalink,
+		Blocks: []any{
+			slack.ContextBlock{
+				Type: "context",
+				Elements: []any{
+					slack.ImageElement{
+						Type:     "image",
+						ImageURL: t.User.ProfileImageURLHttps,
+						AltText:  t.User.ScreenName,
+					},
+					slack.TextObject{
+						Type: "mrkdwn",
+						// If t.User.Name contains '*', then bolding name will be broken.
+						// I don't know how to fix it, and it may be OK.
+						Text: fmt.Sprintf("*%s* @%s", t.User.Name, t.User.ScreenName),
+					},
+				},
+			},
+			slack.SectionBlock{
+				Type: "section",
+				Text: slack.TextObject{
+					Type:  "plain_text",
+					Text:  t.Text,
+					Emoji: false,
+				},
+			},
+			slack.SectionBlock{
+				Type: "section",
+				Text: slack.TextObject{
+					Type:  "mrkdwn",
+					Text:  permalink,
+					Emoji: false,
+				},
+			},
+		},
+	}
 }
 
 func main() {
