@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"time"
@@ -173,6 +174,8 @@ func postJSON(url string, v any) error {
 	if err != nil {
 		return fmt.Errorf("postjson: %w", err)
 	}
+	defer resp.Body.Close()
+	io.Copy(io.Discard, resp.Body)
 
 	if resp.StatusCode >= 400 {
 		return fmt.Errorf("postjson: failed with status: %s", resp.Status)
