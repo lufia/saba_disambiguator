@@ -210,9 +210,8 @@ func formatTweetIntoSlackPayload(t *twitter.Tweet) slack.Payload {
 			slack.SectionBlock{
 				Type: "section",
 				Text: slack.TextObject{
-					Type:  "mrkdwn",
-					Text:  permalink,
-					Emoji: false,
+					Type: "mrkdwn",
+					Text: permalink,
 				},
 			},
 		},
