@@ -113,6 +113,10 @@ func main() {
 
 		time.Sleep(1 * time.Second)
 		tweet, resp, err := client.Statuses.Show(id, nil)
+		if err != nil {
+			log.Printf("failed to get tweet %s: %v\n", text, err)
+			continue
+		}
 		if resp.StatusCode != 200 {
 			log.Printf("failed to get tweet %s: status=%d, %v\n", text, resp.StatusCode, err)
 			continue
