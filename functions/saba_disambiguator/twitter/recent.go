@@ -59,9 +59,9 @@ func (bt BearerToken) RecentSearch(query string) ([]*Tweet, error) {
 		return nil, fmt.Errorf("twitter.RecentSearch: %w", err)
 	}
 
-	users := make(map[string]*User, len(resp.Includes.Users))
+	users := make(map[string]User, len(resp.Includes.Users))
 	for _, u := range resp.Includes.Users {
-		users[u.ID] = &u
+		users[u.ID] = u
 	}
 
 	tweets := make([]*Tweet, 0, len(resp.Data))
@@ -74,7 +74,7 @@ func (bt BearerToken) RecentSearch(query string) ([]*Tweet, error) {
 			ID:        d.ID,
 			Text:      d.Text,
 			CreatedAt: d.CreatedAt,
-			User:      u,
+			User:      &u,
 		}
 		tweets = append(tweets, t)
 	}
