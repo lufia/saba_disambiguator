@@ -53,15 +53,7 @@ type URLEntry struct {
 	UnwoundURL  string `json:"unwound_url"`
 }
 
-type responseRecentSearch struct {
-	Data     []responseTweet `json:"data"`
-	Includes struct {
-		Users  []*User          `json:"users"`
-		Tweets []*responseTweet `json:"tweets"`
-	} `json:"includes"`
-}
-
-type responseTweet struct {
+type tweetResponse struct {
 	ID               string            `json:"id"`
 	Text             string            `json:"text"`
 	CreatedAt        time.Time         `json:"created_at"`

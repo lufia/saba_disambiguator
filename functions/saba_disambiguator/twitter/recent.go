@@ -11,6 +11,14 @@ type BearerToken string
 
 var Host = "api.twitter.com"
 
+type recentSearchResponse struct {
+	Data     []tweetResponse `json:"data"`
+	Includes struct {
+		Users  []*User          `json:"users"`
+		Tweets []*tweetResponse `json:"tweets"`
+	} `json:"includes"`
+}
+
 const RecentSearchPath = "/2/tweets/search/recent"
 
 // https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-recent
@@ -32,7 +40,7 @@ func (bt BearerToken) RecentSearch(query string) ([]*Tweet, error) {
 		RawQuery: queryParam,
 	}
 
-	var resp responseRecentSearch
+	var resp recentSearchResponse
 	err := bt.getJSON(&resp, u)
 	if err != nil {
 		return nil, fmt.Errorf("twitter.RecentSearch: %w", err)
@@ -42,7 +50,7 @@ func (bt BearerToken) RecentSearch(query string) ([]*Tweet, error) {
 	for _, u := range resp.Includes.Users {
 		users[u.ID] = u
 	}
-	includesTweets := make(map[string]*responseTweet, len(resp.Includes.Tweets))
+	includesTweets := make(map[string]*tweetResponse, len(resp.Includes.Tweets))
 	for _, t := range resp.Includes.Tweets {
 		includesTweets[t.ID] = t
 	}
