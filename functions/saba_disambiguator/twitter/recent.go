@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -21,13 +22,13 @@ type User struct {
 }
 
 type responseRecentSearch struct {
-	Data     []responseRecentSearchData `json:"data"`
+	Data     []responseTweet `json:"data"`
 	Includes struct {
 		Users []User `json:"users"`
 	} `json:"includes"`
 }
 
-type responseRecentSearchData struct {
+type responseTweet struct {
 	ID        string    `json:"id"`
 	Text      string    `json:"text"`
 	CreatedAt time.Time `json:"created_at"`
@@ -38,23 +39,28 @@ type BearerToken string
 
 var Host = "api.twitter.com"
 
-var RecentSearchPath = "2/tweets/search/recent"
+const RecentSearchPath = "/2/tweets/search/recent"
 
 // https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-recent
 func (bt BearerToken) RecentSearch(query string) ([]*Tweet, error) {
 	params := url.Values{}
+	params.Set("query", query)
 	params.Set("max_results", "100")
 	params.Set("tweet.fields", "created_at")
 	params.Set("expansions", "author_id")
+
+	// A space should be escaped into '%20' instead of '+' on twitter's query parameter.
+	queryParam := strings.Replace(params.Encode(), "+", "%20", -1)
 
 	u := &url.URL{
 		Scheme:   "https",
 		Host:     Host,
 		Path:     RecentSearchPath,
-		RawQuery: params.Encode(),
+		RawQuery: queryParam,
 	}
 
-	resp, err := getJSON[responseRecentSearch](u, bt.newHeader())
+	var resp responseRecentSearch
+	err := bt.getJSON(&resp, u)
 	if err != nil {
 		return nil, fmt.Errorf("twitter.RecentSearch: %w", err)
 	}
@@ -84,5 +90,10 @@ func (bt BearerToken) RecentSearch(query string) ([]*Tweet, error) {
 func (bt BearerToken) newHeader() http.Header {
 	p := http.Header{}
 	p.Set("Authorization", fmt.Sprintf("Bearer %s", bt))
+	p.Set("User-Agent", "sabadisambiguator")
 	return p
+}
+
+func (bt BearerToken) getJSON(v any, u *url.URL) error {
+	return getJSON(v, u, bt.newHeader())
 }

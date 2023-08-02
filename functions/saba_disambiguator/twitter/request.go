@@ -8,7 +8,7 @@ import (
 	"net/url"
 )
 
-func getJSON[T any](u *url.URL, header http.Header) (v T, err error) {
+func getJSON(v any, u *url.URL, header http.Header) error {
 	req := &http.Request{
 		Method: "GET",
 		Header: header,
@@ -16,7 +16,7 @@ func getJSON[T any](u *url.URL, header http.Header) (v T, err error) {
 	}
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return v, err
+		return err
 	}
 	defer func() {
 		io.Copy(io.Discard, resp.Body)
@@ -24,9 +24,9 @@ func getJSON[T any](u *url.URL, header http.Header) (v T, err error) {
 	}()
 
 	if resp.StatusCode >= 400 {
-		return v, fmt.Errorf("getJSON: failed with status: %s", resp.Status)
+		return fmt.Errorf("getJSON: failed with status: %s", resp.Status)
 	}
 
 	err = json.NewDecoder(resp.Body).Decode(&v)
-	return v, err
+	return err
 }
