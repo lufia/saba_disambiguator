@@ -27,24 +27,24 @@ type Entities struct {
 	// 使われていない
 	// Cashtags []any `json:"cashtags"`
 
-	Hashtags []EntitiesHashTag `json:"hashtags"`
-	Mentions []EntitiesMention `json:"mentions"`
-	URLs     []EntitiesURL     `json:"urls"`
+	Hashtags []HashtagEntry `json:"hashtags"`
+	Mentions []MentionEntry `json:"mentions"`
+	URLs     []URLEntry     `json:"urls"`
 }
 
-type EntitiesHashTag struct {
+type HashtagEntry struct {
 	Start int    `json:"start"`
 	End   int    `json:"end"`
 	Tag   string `json:"tag"`
 }
 
-type EntitiesMention struct {
+type MentionEntry struct {
 	Start    int    `json:"start"`
 	End      int    `json:"end"`
 	UserName string `json:"username"`
 }
 
-type EntitiesURL struct {
+type URLEntry struct {
 	Start       int    `json:"start"`
 	End         int    `json:"end"`
 	URL         string `json:"url"`
