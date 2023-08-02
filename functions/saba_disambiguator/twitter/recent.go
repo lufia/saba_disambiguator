@@ -60,7 +60,7 @@ func (bt BearerToken) RecentSearch(query string) ([]*Tweet, error) {
 				if r.Type == typeQuoted {
 					tw := includesTweets[r.ID]
 					if !ok {
-						return nil, fmt.Errorf("twitter.RecentSearch: unkown twitter_id %s", t.ID)
+						return nil, fmt.Errorf("twitter.RecentSearch: unkown twitter_id %s", r.ID)
 					}
 					quotedStatus = &Tweet{
 						ID:        tw.ID,
