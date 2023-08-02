@@ -10,7 +10,7 @@ type Tweet struct {
 	Lang              string
 	QuotedStatus      *Tweet
 	InReplyToUserName string
-	Entities          []Entities
+	Entities          Entities
 }
 
 type User struct {
