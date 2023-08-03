@@ -59,7 +59,7 @@ type tweetResponse struct {
 	CreatedAt        time.Time         `json:"created_at"`
 	AuthorID         string            `json:"author_id"`
 	Lang             string            `json:"lang"`
-	Entities         Entities          `json:"entites"`
+	Entities         Entities          `json:"entities"`
 	ReferencedTweets []referencedTweet `json:"referenced_tweets"`
 	InReplyToUserID  string            `json:"in_reply_to_user_id"`
 }
