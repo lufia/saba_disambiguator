@@ -34,7 +34,7 @@ func (bt BearerToken) RecentSearch(query string) ([]*Tweet, error) {
 	// referenced_tweets は 検索結果の tweet が言及している tweet (retweeted, quoted など) を含める。
 	params.Set("tweet.fields", "created_at", "entities", "lang", "referenced_tweets")
 	//　.includes.user にあるユーザー情報に含める要素
-	params.Set("user.fields", "description,id,name,username,url,profile_image_url")
+	params.Set("user.fields", "description", "id", "name", "username", "url", "profile_image_url")
 	// .includes になんの情報を含めるか定める。たとえば author_id を含めると検索結果 tweet の主を .include.user に含める。
 	params.Set("expansions", "author_id", "in_reply_to_user_id", "referenced_tweets.id")
 
