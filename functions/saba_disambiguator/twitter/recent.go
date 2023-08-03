@@ -12,7 +12,11 @@ type BearerToken string
 var Host = "api.twitter.com"
 
 type recentSearchResponse struct {
-	Data     []tweetResponse `json:"data"`
+	// 検索によって返される tweet
+	Data []tweetResponse `json:"data"`
+
+	// twitter v2 の　API は ユーザー や tweet に関係する他の tweet を ID で表記されている。
+	// それらの実態は includes 以下におかれる。 (query parameter に includes に追加するように指定する必要がある。)
 	Includes struct {
 		Users  []*User          `json:"users"`
 		Tweets []*tweetResponse `json:"tweets"`
@@ -26,8 +30,13 @@ func (bt BearerToken) RecentSearch(query string) ([]*Tweet, error) {
 	params := newParams()
 	params.Set("query", query)
 	params.Set("max_results", "100")
+	// 検索結果の tweet のオブジェクトに置かれるフィールドを指定する。
+	// entities は hashtag, url などの情報
+	// referenced_tweets は 検索結果の tweet が言及している tweet (retweeted, quoted など) を含める。
 	params.Set("tweet.fields", "created_at", "entities", "lang", "referenced_tweets")
+	//　.includes.user にあるユーザー情報に含める要素
 	params.Set("user.fields", "description,id,name,username,url,profile_image_url")
+	// .includes になんの情報を含めるか定める。たとえば author_id を含めると検索結果 tweet の主を .include.user に含める。
 	params.Set("expansions", "author_id", "in_reply_to_user_id", "referenced_tweets.id")
 
 	// A space should be escaped into '%20' instead of '+' on twitter's query parameter.
@@ -57,11 +66,14 @@ func (bt BearerToken) RecentSearch(query string) ([]*Tweet, error) {
 
 	tweets := make([]*Tweet, 0, len(resp.Data))
 	for _, d := range resp.Data {
+		// tweet オブジェクトに含まれるのは auther_id (数字の並び)のみ
+		// .includes.user から対応するユーザーを持ってくる。
 		u, ok := users[d.AuthorID]
 		if !ok {
 			return nil, fmt.Errorf("twitter.RecentSearch: unkown author_id %s", d.AuthorID)
 		}
 
+		// saba_disambiguator は referenced tweets (retweeted, quoted, replied to) の中で quote された tweet のみ見ている。
 		var quotedStatus *Tweet
 		if len(d.ReferencedTweets) > 0 {
 			for _, r := range d.ReferencedTweets {
