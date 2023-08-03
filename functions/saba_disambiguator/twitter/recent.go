@@ -27,8 +27,8 @@ func (bt BearerToken) RecentSearch(query string) ([]*Tweet, error) {
 	params.Set("query", query)
 	params.Set("max_results", "100")
 	params.Set("tweet.fields", "created_at", "entities", "lang", "referenced_tweets")
-	params.Set("user.fields", "description")
-	params.Set("expansions", "author_id", "in_reply_to_user_id")
+	params.Set("user.fields", "description,id,name,username,url,profile_image_url")
+	params.Set("expansions", "author_id", "in_reply_to_user_id", "referenced_tweets.id")
 
 	// A space should be escaped into '%20' instead of '+' on twitter's query parameter.
 	queryParam := strings.Replace(params.Encode(), "+", "%20", -1)
@@ -66,7 +66,7 @@ func (bt BearerToken) RecentSearch(query string) ([]*Tweet, error) {
 		if len(d.ReferencedTweets) > 0 {
 			for _, r := range d.ReferencedTweets {
 				if r.Type == typeQuoted {
-					tw := includesTweets[r.ID]
+					tw, ok := includesTweets[r.ID]
 					if !ok {
 						return nil, fmt.Errorf("twitter.RecentSearch: unkown twitter_id %s", r.ID)
 					}
@@ -81,6 +81,15 @@ func (bt BearerToken) RecentSearch(query string) ([]*Tweet, error) {
 			}
 		}
 
+		inReplyToUserName := ""
+		if d.InReplyToUserID != "" {
+			u, ok := users[d.InReplyToUserID]
+			if !ok {
+				return nil, fmt.Errorf("twitter.RecentSearch: unkown user_id %s", d.InReplyToUserID)
+			}
+			inReplyToUserName = u.UserName
+		}
+
 		t := &Tweet{
 			ID:                d.ID,
 			Text:              d.Text,
@@ -88,7 +97,8 @@ func (bt BearerToken) RecentSearch(query string) ([]*Tweet, error) {
 			User:              u,
 			Lang:              d.Lang,
 			QuotedStatus:      quotedStatus,
-			InReplyToUserName: users[d.InReplyToUserID].UserName,
+			InReplyToUserName: inReplyToUserName,
+			Entities:          d.Entities,
 		}
 		tweets = append(tweets, t)
 	}
