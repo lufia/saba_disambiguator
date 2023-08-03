@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strings"
 )
 
 type BearerToken string
@@ -39,14 +38,11 @@ func (bt BearerToken) RecentSearch(query string) ([]*Tweet, error) {
 	// .includes になんの情報を含めるか定める。たとえば author_id を含めると検索結果 tweet の主を .include.user に含める。
 	params.Set("expansions", "author_id", "in_reply_to_user_id", "referenced_tweets.id")
 
-	// A space should be escaped into '%20' instead of '+' on twitter's query parameter.
-	queryParam := strings.Replace(params.Encode(), "+", "%20", -1)
-
 	u := &url.URL{
 		Scheme:   "https",
 		Host:     Host,
 		Path:     RecentSearchPath,
-		RawQuery: queryParam,
+		RawQuery: params.Encode(),
 	}
 
 	var resp recentSearchResponse

@@ -16,3 +16,8 @@ func newParams() Params {
 func (p Params) Set(key string, value ...string) {
 	p.Values.Set(key, strings.Join(value, ","))
 }
+
+func (p Params) Encode() string {
+	// A space should be escaped into '%20' instead of '+' on twitter's query parameter.
+	return strings.Replace(p.Values.Encode(), "+", "%20", -1)
+}
