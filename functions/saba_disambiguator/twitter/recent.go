@@ -81,18 +81,19 @@ func (c *Client) RecentSearch(query string) ([]*Tweet, error) {
 		var quotedStatus *Tweet
 		if len(d.ReferencedTweets) > 0 {
 			for _, r := range d.ReferencedTweets {
-				if r.Type == typeQuoted {
-					tw, ok := includesTweets[r.ID]
-					if !ok {
-						return nil, fmt.Errorf("twitter.RecentSearch: unkown twitter_id %s", r.ID)
-					}
-					quotedStatus = &Tweet{
-						ID:        tw.ID,
-						Text:      tw.Text,
-						CreatedAt: tw.CreatedAt,
-						User:      users[tw.AuthorID],
-						Lang:      tw.Lang,
-					}
+				if r.Type != typeQuoted {
+					continue
+				}
+				tw, ok := includesTweets[r.ID]
+				if !ok {
+					return nil, fmt.Errorf("twitter.RecentSearch: unkown twitter_id %s", r.ID)
+				}
+				quotedStatus = &Tweet{
+					ID:        tw.ID,
+					Text:      tw.Text,
+					CreatedAt: tw.CreatedAt,
+					User:      users[tw.AuthorID],
+					Lang:      tw.Lang,
 				}
 			}
 		}
