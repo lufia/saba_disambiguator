@@ -24,8 +24,16 @@ type recentSearchResponse struct {
 
 const RecentSearchPath = "/2/tweets/search/recent"
 
+type Client struct {
+	bearerToken string
+}
+
+func NewClient(bearerToken string) *Client {
+	return &Client{bearerToken: bearerToken}
+}
+
 // https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-recent
-func (bt BearerToken) RecentSearch(query string) ([]*Tweet, error) {
+func (c *Client) RecentSearch(query string) ([]*Tweet, error) {
 	params := newParams()
 	params.Set("query", query)
 	params.Set("max_results", "100")
@@ -46,7 +54,7 @@ func (bt BearerToken) RecentSearch(query string) ([]*Tweet, error) {
 	}
 
 	var resp recentSearchResponse
-	err := bt.getJSON(&resp, u)
+	err := c.getJSON(&resp, u)
 	if err != nil {
 		return nil, fmt.Errorf("twitter.RecentSearch: %w", err)
 	}
@@ -113,13 +121,13 @@ func (bt BearerToken) RecentSearch(query string) ([]*Tweet, error) {
 	return tweets, nil
 }
 
-func (bt BearerToken) newHeader() http.Header {
+func (c *Client) newHeader() http.Header {
 	p := http.Header{}
-	p.Set("Authorization", fmt.Sprintf("Bearer %s", bt))
+	p.Set("Authorization", fmt.Sprintf("Bearer %s", c.bearerToken))
 	p.Set("User-Agent", "sabadisambiguator")
 	return p
 }
 
-func (bt BearerToken) getJSON(v any, u *url.URL) error {
-	return getJSON(v, u, bt.newHeader())
+func (c *Client) getJSON(v any, u *url.URL) error {
+	return getJSON(v, u, c.newHeader())
 }
