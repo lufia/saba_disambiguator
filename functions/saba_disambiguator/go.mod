@@ -7,6 +7,7 @@ require (
 	github.com/aws/aws-lambda-go v1.34.1
 	github.com/aws/aws-sdk-go v1.44.124
 	github.com/dghubble/go-twitter v0.0.0-20221024160433-0cc1e72ed6d8
+	github.com/google/go-querystring v1.1.0
 	github.com/syou6162/saba_disambiguator v0.0.5
 	google.golang.org/api v0.103.0
 )
@@ -22,7 +23,6 @@ require (
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
-	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.7.0 // indirect
