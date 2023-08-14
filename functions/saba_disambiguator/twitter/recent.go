@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
+
+	"github.com/google/go-querystring/query"
 )
 
 type BearerToken string
@@ -22,6 +25,20 @@ type recentSearchResponse struct {
 	} `json:"includes"`
 }
 
+type recentSearchQueryParam struct {
+	Query      string `url:"query"`
+	MaxResults int    `url:"max_results"`
+
+	// 検索結果の tweet のオブジェクトに置かれるフィールドを指定する。
+	TweetFields []string `url:"tweet.fields,comma"`
+
+	//　.includes.user にあるユーザー情報に含める要素
+	UserFields []string `url:"user.fields,comma"`
+
+	// .includes になんの情報を含めるか定める。
+	Expansions []string `url:"expansions,comma"`
+}
+
 const RecentSearchPath = "/2/tweets/search/recent"
 
 type Client struct {
@@ -33,28 +50,34 @@ func NewClient(bearerToken string) *Client {
 }
 
 // https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-recent
-func (c *Client) RecentSearch(query string) ([]*Tweet, error) {
-	params := newParams()
-	params.Set("query", query)
-	params.Set("max_results", "100")
-	// 検索結果の tweet のオブジェクトに置かれるフィールドを指定する。
-	// entities は hashtag, url などの情報
-	// referenced_tweets は 検索結果の tweet が言及している tweet (retweeted, quoted など) を含める。
-	params.Set("tweet.fields", "created_at", "entities", "lang", "referenced_tweets")
-	//　.includes.user にあるユーザー情報に含める要素
-	params.Set("user.fields", "description", "id", "name", "username", "url", "profile_image_url")
-	// .includes になんの情報を含めるか定める。たとえば author_id を含めると検索結果 tweet の主を .include.user に含める。
-	params.Set("expansions", "author_id", "in_reply_to_user_id", "referenced_tweets.id")
+func (c *Client) RecentSearch(q string) ([]*Tweet, error) {
+	params := recentSearchQueryParam{
+		Query:      q,
+		MaxResults: 100,
+
+		// entities は hashtag, url などの情報
+		// referenced_tweets は 検索結果の tweet が言及している tweet (retweeted, quoted など) を含める。
+		TweetFields: []string{"created_at", "entities", "lang", "referenced_tweets"},
+		UserFields:  []string{"description", "id", "name", "username", "url", "profile_image_url"},
+
+		// author_id を含めると検索結果 tweet の主を .include.user に含める。
+		Expansions: []string{"author_id", "in_reply_to_user_id", "referenced_tweets.id"},
+	}
+	v, err := query.Values(params)
+	if err != nil {
+		return nil, fmt.Errorf("twitter.RecentSearch: %w", err)
+	}
 
 	u := &url.URL{
-		Scheme:   "https",
-		Host:     Host,
-		Path:     RecentSearchPath,
-		RawQuery: params.Encode(),
+		Scheme: "https",
+		Host:   Host,
+		Path:   RecentSearchPath,
+		// A space should be escaped into '%20' instead of '+' on twitter's query parameter.
+		RawQuery: strings.Replace(v.Encode(), "+", "%20", -1),
 	}
 
 	var resp recentSearchResponse
-	err := c.getJSON(&resp, u)
+	err = c.getJSON(&resp, u)
 	if err != nil {
 		return nil, fmt.Errorf("twitter.RecentSearch: %w", err)
 	}
