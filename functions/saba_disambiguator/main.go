@@ -17,7 +17,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ssm"
 	"github.com/dghubble/go-twitter/twitter"
-	"github.com/syou6162/saba_disambiguator/functions/saba_disambiguator/slack"
+	"github.com/syou6162/saba_disambiguator/slack"
 	"google.golang.org/api/option"
 )
 

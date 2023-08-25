@@ -12,7 +12,7 @@ jobs:
     - name: Setup Go
       uses: actions/setup-go@v3
       with:
-        go-version-file: functions/saba_disambiguator/go.mod
+        go-version-file: ./go.mod
     - name: Build
       env:
         GOPATH: /home/runner/work/
