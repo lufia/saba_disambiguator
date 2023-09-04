@@ -3,7 +3,7 @@ package sabadisambiguator
 import (
 	"math/rand"
 
-	"github.com/dghubble/go-twitter/twitter"
+	twitter2 "github.com/syou6162/saba_disambiguator/twitter"
 )
 
 type LabelType int
@@ -16,12 +16,12 @@ const (
 type Example struct {
 	Label LabelType `json:"Label"`
 	Fv    FeatureVector
-	Tweet twitter.Tweet
+	Tweet *twitter2.Tweet
 }
 
 type Examples []*Example
 
-func NewExampleWithOptions(tweet twitter.Tweet, label LabelType, opts ExtractOptions) *Example {
+func NewExampleWithOptions(tweet *twitter2.Tweet, label LabelType, opts ExtractOptions) *Example {
 	fv := ExtractFeaturesWithOptions(tweet, opts)
 	return &Example{Label: label, Fv: fv, Tweet: tweet}
 }
