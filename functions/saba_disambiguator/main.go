@@ -11,12 +11,13 @@ import (
 
 	sabadisambiguator "github.com/syou6162/saba_disambiguator/lib"
 
+	twitter2 "github.com/syou6162/saba_disambiguator/twitter"
+
 	"cloud.google.com/go/bigquery"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ssm"
-	"github.com/dghubble/go-twitter/twitter"
 	"github.com/syou6162/saba_disambiguator/slack"
 	"google.golang.org/api/option"
 )
@@ -63,10 +64,7 @@ func DoDisambiguate() error {
 		Region: aws.String(config.Region),
 	})
 
-	client, err := sabadisambiguator.GetTwitterClient(svc, *config)
-	if err != nil {
-		return err
-	}
+	client := twitter2.NewClient("")
 
 	slackConfig, err := getSlackConfig(svc, *config)
 	if err != nil {
@@ -82,11 +80,7 @@ func DoDisambiguate() error {
 		query = config.Query
 	}
 
-	search, _, err := client.Search.Tweets(&twitter.SearchTweetParams{
-		Query:      query,
-		Count:      100,
-		ResultType: "recent",
-	})
+	resp, err := client.RecentSearch(query)
 
 	if err != nil {
 		return err
@@ -95,11 +89,8 @@ func DoDisambiguate() error {
 	now := time.Now()
 	itemsForBq := make([]*ItemForBigQuery, 0)
 
-	for _, t := range search.Statuses {
-		createdAt, err := t.CreatedAtTime()
-		if err != nil {
-			return err
-		}
+	for _, t := range resp {
+		createdAt := t.CreatedAt
 		if now.After(createdAt.Add(5 * time.Minute)) {
 			continue
 		}
@@ -115,8 +106,8 @@ func DoDisambiguate() error {
 		predLabel := model.Predict(fv)
 		item := ItemForBigQuery{
 			CreatedAt:  createdAt,
-			IdStr:      t.IDStr,
-			ScreenName: t.User.ScreenName,
+			IdStr:      t.ID,
+			ScreenName: t.User.UserName,
 			Text:       t.Text,
 			RawJson:    string(tweetJson),
 			Score:      score,
@@ -124,7 +115,7 @@ func DoDisambiguate() error {
 		}
 		itemsForBq = append(itemsForBq, &item)
 
-		payload := formatTweetIntoSlackPayload(&t)
+		payload := formatTweetIntoSlackPayload(t)
 
 		err = nil
 		if predLabel == sabadisambiguator.POSITIVE {
@@ -179,8 +170,8 @@ func postJSON(url string, v any) error {
 	return nil
 }
 
-func formatTweetIntoSlackPayload(t *twitter.Tweet) slack.Payload {
-	permalink := fmt.Sprintf("https://twitter.com/%s/status/%s", t.User.ScreenName, t.IDStr)
+func formatTweetIntoSlackPayload(t *twitter2.Tweet) slack.Payload {
+	permalink := fmt.Sprintf("https://twitter.com/%s/status/%s", t.User.UserName, t.ID)
 
 	return slack.Payload{
 		Text: permalink,
@@ -190,12 +181,12 @@ func formatTweetIntoSlackPayload(t *twitter.Tweet) slack.Payload {
 				Elements: []any{
 					slack.ImageElement{
 						Type:     "image",
-						ImageURL: t.User.ProfileImageURLHttps,
-						AltText:  t.User.ScreenName,
+						ImageURL: t.User.ProfileImageURL,
+						AltText:  t.User.UserName,
 					},
 					slack.TextObject{
 						Type: "plain_text",
-						Text: fmt.Sprintf("%s @%s", t.User.Name, t.User.ScreenName),
+						Text: fmt.Sprintf("%s @%s", t.User.Name, t.User.UserName),
 					},
 				},
 			},

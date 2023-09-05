@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/dghubble/go-twitter/twitter"
 	"github.com/ikawaha/kagome.ipadic/tokenizer"
+	twitter2 "github.com/syou6162/saba_disambiguator/twitter"
 )
 
 type FeatureVector []string
@@ -30,11 +30,11 @@ func extractJpnNounFeatures(s string, prefix string) FeatureVector {
 	return fv
 }
 
-func inReplyToScreenName(t twitter.Tweet) string {
-	return t.InReplyToScreenName
+func inReplyToScreenName(t *twitter2.Tweet) string {
+	return t.InReplyToUserName
 }
 
-func lang(t twitter.Tweet) string {
+func lang(t *twitter2.Tweet) string {
 	return t.Lang
 }
 
@@ -42,7 +42,7 @@ func ExtractNounFeatures(s string, prefix string) FeatureVector {
 	return extractJpnNounFeatures(s, prefix)
 }
 
-func extractNounFeaturesFromQuotedText(t twitter.Tweet) FeatureVector {
+func extractNounFeaturesFromQuotedText(t *twitter2.Tweet) FeatureVector {
 	var fv FeatureVector
 	if t.QuotedStatus == nil {
 		return fv
@@ -50,7 +50,7 @@ func extractNounFeaturesFromQuotedText(t twitter.Tweet) FeatureVector {
 	return ExtractNounFeatures(t.QuotedStatus.Text, "QuotedText")
 }
 
-func extractNounFeaturesFromUserDescription(t twitter.Tweet) FeatureVector {
+func extractNounFeaturesFromUserDescription(t *twitter2.Tweet) FeatureVector {
 	var fv FeatureVector
 	if t.QuotedStatus == nil {
 		return fv
@@ -58,33 +58,27 @@ func extractNounFeaturesFromUserDescription(t twitter.Tweet) FeatureVector {
 	return ExtractNounFeatures(t.User.Description, "UserDescription")
 }
 
-func screenNameInQuotedStatus(t twitter.Tweet) string {
+func screenNameInQuotedStatus(t *twitter2.Tweet) string {
 	result := ""
 	if t.QuotedStatus == nil {
 		return result
 	}
-	return t.QuotedStatus.User.ScreenName
+	return t.QuotedStatus.User.UserName
 }
 
-func domainsInEntities(t twitter.Tweet) FeatureVector {
+func domainsInEntities(t *twitter2.Tweet) FeatureVector {
 	var fv FeatureVector
-	if t.Entities == nil {
-		return fv
-	}
 
-	for _, u := range t.Entities.Urls {
+	for _, u := range t.Entities.URLs {
 		fv = append(fv, "DomainsInEntity:"+strings.Split(u.DisplayURL, "/")[0])
 	}
 	return fv
 }
 
-func wordsInUrlPaths(t twitter.Tweet) FeatureVector {
+func wordsInUrlPaths(t *twitter2.Tweet) FeatureVector {
 	var fv FeatureVector
-	if t.Entities == nil {
-		return fv
-	}
 
-	for _, url_ := range t.Entities.Urls {
+	for _, url_ := range t.Entities.URLs {
 		u, err := url.Parse(url_.ExpandedURL)
 		if err != nil {
 			continue
@@ -99,14 +93,11 @@ func wordsInUrlPaths(t twitter.Tweet) FeatureVector {
 	return fv
 }
 
-func hashtagsInEntities(t twitter.Tweet) FeatureVector {
+func hashtagsInEntities(t *twitter2.Tweet) FeatureVector {
 	var fv FeatureVector
-	if t.Entities == nil {
-		return fv
-	}
 
 	for _, h := range t.Entities.Hashtags {
-		fv = append(fv, "HashtagsInEntity:"+h.Text)
+		fv = append(fv, "HashtagsInEntity:"+h.Tag)
 	}
 	return fv
 }
@@ -131,30 +122,30 @@ func (opts *ExtractOptions) contains(screenName string) bool {
 	return false
 }
 
-func (opts *ExtractOptions) includeScreenNameInUserMentions(t twitter.Tweet) bool {
+func (opts *ExtractOptions) includeScreenNameInUserMentions(t *twitter2.Tweet) bool {
 	result := false
-	for _, m := range t.Entities.UserMentions {
-		if opts.contains(m.ScreenName) {
+	for _, m := range t.Entities.Mentions {
+		if opts.contains(m.UserName) {
 			return true
 		}
 	}
 	return result
 }
 
-func (opts *ExtractOptions) includeScreenNameInReplyToScreenName(t twitter.Tweet) bool {
-	return opts.contains(t.InReplyToScreenName)
+func (opts *ExtractOptions) includeScreenNameInReplyToScreenName(t *twitter2.Tweet) bool {
+	return opts.contains(t.InReplyToUserName)
 }
 
-func ExtractFeaturesWithOptions(t twitter.Tweet, opts ExtractOptions) FeatureVector {
+func ExtractFeaturesWithOptions(t *twitter2.Tweet, opts ExtractOptions) FeatureVector {
 	var fv FeatureVector
 	text := t.Text
 
 	fv = append(fv, "BIAS")
-	fv = append(fv, "ScreenName:"+t.User.ScreenName)
+	fv = append(fv, "ScreenName:"+t.User.UserName)
 	fv = append(fv, "inReplyToScreenName:"+inReplyToScreenName(t))
 	fv = append(fv, "screenNameInQuotedStatus:"+screenNameInQuotedStatus(t))
 	fv = append(fv, "lang:"+lang(t))
-	fv = append(fv, "containsMackerelInScreenName:"+strconv.FormatBool(opts.contains(t.User.ScreenName)))
+	fv = append(fv, "containsMackerelInScreenName:"+strconv.FormatBool(opts.contains(t.User.UserName)))
 	fv = append(fv, "includeMackerelInUserMentions:"+strconv.FormatBool(opts.includeScreenNameInUserMentions(t)))
 	fv = append(fv, "includeMackerelInReplyToScreenName:"+strconv.FormatBool(opts.includeScreenNameInReplyToScreenName(t)))
 
