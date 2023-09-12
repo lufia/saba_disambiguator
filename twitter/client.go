@@ -9,10 +9,25 @@ import (
 	"net/url"
 )
 
-func getJSON(v any, u *url.URL, header http.Header) error {
+type Client struct {
+	bearerToken string
+}
+
+func NewClient(bearerToken string) *Client {
+	return &Client{bearerToken: bearerToken}
+}
+
+func (c *Client) newHeader() http.Header {
+	p := http.Header{}
+	p.Set("Authorization", fmt.Sprintf("Bearer %s", c.bearerToken))
+	p.Set("User-Agent", "sabadisambiguator")
+	return p
+}
+
+func (c *Client) getJSON(v any, u *url.URL) error {
 	req := &http.Request{
 		Method: "GET",
-		Header: header,
+		Header: c.newHeader(),
 		URL:    u,
 	}
 	resp, err := http.DefaultClient.Do(req)

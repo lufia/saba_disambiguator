@@ -2,7 +2,6 @@ package twitter2
 
 import (
 	"fmt"
-	"net/http"
 	"net/url"
 	"strings"
 
@@ -40,14 +39,6 @@ type recentSearchQueryParam struct {
 }
 
 const RecentSearchPath = "/2/tweets/search/recent"
-
-type Client struct {
-	bearerToken string
-}
-
-func NewClient(bearerToken string) *Client {
-	return &Client{bearerToken: bearerToken}
-}
 
 // https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-recent
 func (c *Client) RecentSearch(q string) ([]*Tweet, error) {
@@ -100,15 +91,4 @@ func (c *Client) RecentSearch(q string) ([]*Tweet, error) {
 		tweets = append(tweets, t)
 	}
 	return tweets, nil
-}
-
-func (c *Client) newHeader() http.Header {
-	p := http.Header{}
-	p.Set("Authorization", fmt.Sprintf("Bearer %s", c.bearerToken))
-	p.Set("User-Agent", "sabadisambiguator")
-	return p
-}
-
-func (c *Client) getJSON(v any, u *url.URL) error {
-	return getJSON(v, u, c.newHeader())
 }
