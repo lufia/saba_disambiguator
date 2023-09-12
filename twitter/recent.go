@@ -57,7 +57,7 @@ func (c *Client) RecentSearch(q string) ([]*Tweet, error) {
 
 		// entities は hashtag, url などの情報
 		// referenced_tweets は 検索結果の tweet が言及している tweet (retweeted, quoted など) を含める。
-		TweetFields: []string{"created_at", "entities", "lang", "referenced_tweets"},
+		TweetFields: []string{"created_at", "entities", "lang", "referenced_tweets", "author_id"},
 		UserFields:  []string{"description", "id", "name", "username", "url", "profile_image_url"},
 
 		// author_id を含めると検索結果 tweet の主を .include.user に含める。
@@ -93,52 +93,9 @@ func (c *Client) RecentSearch(q string) ([]*Tweet, error) {
 
 	tweets := make([]*Tweet, 0, len(resp.Data))
 	for _, d := range resp.Data {
-		// tweet オブジェクトに含まれるのは auther_id (数字の並び)のみ
-		// .includes.user から対応するユーザーを持ってくる。
-		u, ok := users[d.AuthorID]
-		if !ok {
-			return nil, fmt.Errorf("twitter.RecentSearch: unkown author_id %s", d.AuthorID)
-		}
-
-		// saba_disambiguator は referenced tweets (retweeted, quoted, replied to) の中で quote された tweet のみ見ている。
-		var quotedStatus *Tweet
-		if len(d.ReferencedTweets) > 0 {
-			for _, r := range d.ReferencedTweets {
-				if r.Type != typeQuoted {
-					continue
-				}
-				tw, ok := includesTweets[r.ID]
-				if !ok {
-					return nil, fmt.Errorf("twitter.RecentSearch: unkown twitter_id %s", r.ID)
-				}
-				quotedStatus = &Tweet{
-					ID:        tw.ID,
-					Text:      tw.Text,
-					CreatedAt: tw.CreatedAt,
-					User:      users[tw.AuthorID],
-					Lang:      tw.Lang,
-				}
-			}
-		}
-
-		inReplyToUserName := ""
-		if d.InReplyToUserID != "" {
-			u, ok := users[d.InReplyToUserID]
-			if !ok {
-				return nil, fmt.Errorf("twitter.RecentSearch: unkown user_id %s", d.InReplyToUserID)
-			}
-			inReplyToUserName = u.UserName
-		}
-
-		t := &Tweet{
-			ID:                d.ID,
-			Text:              d.Text,
-			CreatedAt:         d.CreatedAt,
-			User:              u,
-			Lang:              d.Lang,
-			QuotedStatus:      quotedStatus,
-			InReplyToUserName: inReplyToUserName,
-			Entities:          d.Entities,
+		t, err := tweetResponseToTweet(&d, users, includesTweets)
+		if err != nil {
+			return nil, fmt.Errorf("twitter.RecentSearch: %w", err)
 		}
 		tweets = append(tweets, t)
 	}
