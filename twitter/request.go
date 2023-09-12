@@ -1,6 +1,7 @@
 package twitter2
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -24,7 +25,9 @@ func getJSON(v any, u *url.URL, header http.Header) error {
 	}()
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("getJSON: failed with status: %s", resp.Status)
+		errmsg, _ := io.ReadAll(resp.Body)                          // ここに到達した時点でエラー扱いなので、ここのエラーは無視する。
+		errmsg = bytes.ReplaceAll(errmsg, []byte("\n"), []byte("")) // ログを考慮して改行を消す。おそらく JSON なので、消して問題ない。
+		return fmt.Errorf("getJSON: failed with status %s: %s", resp.Status, errmsg)
 	}
 
 	err = json.NewDecoder(resp.Body).Decode(&v)
