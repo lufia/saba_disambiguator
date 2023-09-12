@@ -9,6 +9,7 @@ import (
 )
 
 type tweetsByIDQueryParam struct {
+	IDs         []string `url:"ids,comma"`
 	Expansions  []string `url:"expansions,comma"`
 	TweetFields []string `url:"tweet.fields,comma"`
 	UserFields  []string `url:"user.fields,comma"`
@@ -16,7 +17,7 @@ type tweetsByIDQueryParam struct {
 
 type tweetsResponse struct {
 	// 検索によって返される tweet
-	Data tweetResponse `json:"data"`
+	Data []tweetResponse `json:"data"`
 
 	// twitter v2 の　API は ユーザー や tweet に関係する他の tweet を ID で表記されている。
 	// それらの実態は includes 以下におかれる。 (query parameter に includes に追加するように指定する必要がある。)
@@ -26,10 +27,11 @@ type tweetsResponse struct {
 	} `json:"includes"`
 }
 
-const TweetsPath = "/2/tweets/"
+const TweetsPath = "/2/tweets"
 
-func (c *Client) TweetsByID(id string) (*Tweet, error) {
+func (c *Client) Tweets(ids []string) ([]*Tweet, error) {
 	params := &tweetsByIDQueryParam{
+		IDs: ids,
 		// entities は hashtag, url などの情報
 		// referenced_tweets は 検索結果の tweet が言及している tweet (retweeted, quoted など) を含める。
 		TweetFields: []string{"created_at", "entities", "lang", "referenced_tweets", "author_id"},
@@ -42,14 +44,10 @@ func (c *Client) TweetsByID(id string) (*Tweet, error) {
 	if err != nil {
 		return nil, fmt.Errorf("twitter.tweets: %w", err)
 	}
-	path, err := url.JoinPath(TweetsPath, id)
-	if err != nil {
-		return nil, fmt.Errorf("twitter.tweets: %w", err)
-	}
 	u := &url.URL{
 		Scheme: "https",
 		Host:   Host,
-		Path:   path,
+		Path:   TweetsPath,
 		// A space should be escaped into '%20' instead of '+' on twitter's query parameter.
 		RawQuery: strings.Replace(v.Encode(), "+", "%20", -1),
 	}
@@ -59,7 +57,6 @@ func (c *Client) TweetsByID(id string) (*Tweet, error) {
 	if err != nil {
 		return nil, fmt.Errorf("twitter.tweets: %w", err)
 	}
-	fmt.Printf("%+v\n", resp)
 	users := make(map[string]*User, len(resp.Includes.Users))
 	for _, u := range resp.Includes.Users {
 		users[u.ID] = u
@@ -68,5 +65,13 @@ func (c *Client) TweetsByID(id string) (*Tweet, error) {
 	for _, t := range resp.Includes.Tweets {
 		includesTweets[t.ID] = t
 	}
-	return tweetResponseToTweet(&resp.Data, users, includesTweets)
+	tweets := make([]*Tweet, 0, len(resp.Data))
+	for _, d := range resp.Data {
+		t, err := tweetResponseToTweet(&d, users, includesTweets)
+		if err != nil {
+			return nil, fmt.Errorf("twitter.RecentSearch: %w", err)
+		}
+		tweets = append(tweets, t)
+	}
+	return tweets, nil
 }
