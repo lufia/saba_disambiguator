@@ -64,7 +64,10 @@ func DoDisambiguate() error {
 		Region: aws.String(config.Region),
 	})
 
-	client := twitter2.NewClient(config.TwitterConfig.ParameterStoreNameBearerToken)
+	client, err := sabadisambiguator.GetTwitterClient(svc, *config)
+	if err != nil {
+		return err
+	}
 
 	slackConfig, err := getSlackConfig(svc, *config)
 	if err != nil {
