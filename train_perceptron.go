@@ -9,16 +9,16 @@ import (
 	"log"
 	"os"
 
-	"github.com/dghubble/go-twitter/twitter"
 	sabadisambiguator "github.com/syou6162/saba_disambiguator/lib"
+	twitter2 "github.com/syou6162/saba_disambiguator/twitter"
 )
 
 var config *sabadisambiguator.Config
 
-func parseLine(line string) (twitter.Tweet, error) {
-	var tweet twitter.Tweet
+func parseLine(line string) (*twitter2.Tweet, error) {
+	var tweet twitter2.Tweet
 	err := json.Unmarshal([]byte(line), &tweet)
-	return tweet, err
+	return &tweet, err
 }
 
 func readExamplesFromFile(fileName string, label sabadisambiguator.LabelType) (sabadisambiguator.Examples, error) {
@@ -34,7 +34,7 @@ func readExamplesFromFile(fileName string, label sabadisambiguator.LabelType) (s
 		text := scanner.Text()
 
 		t, err := parseLine(text)
-		if err != nil || t.ID == 0 {
+		if err != nil || t.ID == "" {
 			continue
 		}
 
