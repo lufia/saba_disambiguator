@@ -78,7 +78,7 @@ func DoDisambiguate() error {
 	if err != nil {
 		return err
 	}
-	query := "mackerel lang:ja exclude:retweets"
+	query := "mackerel lang:ja -is:retweet"
 	if config.Query != "" {
 		query = config.Query
 	}
