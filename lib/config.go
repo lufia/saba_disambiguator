@@ -7,10 +7,7 @@ import (
 )
 
 type TwitterConfig struct {
-	ParameterStoreNameConsumerKey    string `yaml:"parameterStoreNameConsumerKey"`
-	ParameterStoreNameConsumerSecret string `yaml:"parameterStoreNameConsumerSecret"`
-	ParameterStoreNameAccessToken    string `yaml:"parameterStoreNameAccessToken"`
-	ParameterStoreNameAccessSecret   string `yaml:"parameterStoreNameAccessSecret"`
+	ParameterStoreNameBearerToken string `yaml:"parameterStoreNameBearerToken"`
 }
 
 type SlackConfig struct {

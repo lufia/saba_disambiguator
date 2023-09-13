@@ -2,6 +2,7 @@ package twitter2
 
 import (
 	"fmt"
+	"log"
 	"net/url"
 	"strings"
 
@@ -52,7 +53,7 @@ func (c *Client) RecentSearch(q string) ([]*Tweet, error) {
 		UserFields:  []string{"description", "id", "name", "username", "url", "profile_image_url"},
 
 		// author_id を含めると検索結果 tweet の主を .include.user に含める。
-		Expansions: []string{"author_id", "in_reply_to_user_id", "referenced_tweets.id"},
+		Expansions: []string{"author_id", "in_reply_to_user_id", "referenced_tweets.id.author_id"},
 	}
 	v, err := query.Values(params)
 	if err != nil {
@@ -86,7 +87,8 @@ func (c *Client) RecentSearch(q string) ([]*Tweet, error) {
 	for _, d := range resp.Data {
 		t, err := tweetResponseToTweet(&d, users, includesTweets)
 		if err != nil {
-			return nil, fmt.Errorf("twitter.RecentSearch: %w", err)
+			log.Print(err)
+			continue
 		}
 		tweets = append(tweets, t)
 	}

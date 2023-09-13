@@ -109,11 +109,15 @@ func tweetResponseToTweet(t *tweetResponse, users map[string]*User, includesTwee
 			if !ok {
 				return nil, fmt.Errorf("twitter.tweetResponseToTweet: unkown twitter_id %s", r.ID)
 			}
+			twu, ok := users[tw.AuthorID]
+			if !ok {
+				return nil, fmt.Errorf("twitter.tweetResponseToTweet: unkown user_id %s", tw.AuthorID)
+			}
 			quotedStatus = &Tweet{
 				ID:        tw.ID,
 				Text:      tw.Text,
 				CreatedAt: tw.CreatedAt,
-				User:      users[tw.AuthorID],
+				User:      twu,
 				Lang:      tw.Lang,
 			}
 		}

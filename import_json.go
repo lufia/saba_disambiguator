@@ -9,27 +9,31 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/url"
 	"os"
-	"strings"
+	"path"
 	"time"
 
 	"encoding/json"
-	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ssm"
 	sabadisambiguator "github.com/syou6162/saba_disambiguator/lib"
+	twitter2 "github.com/syou6162/saba_disambiguator/twitter"
 )
 
-func parseLine(line string) (int64, error) {
-	tokens := strings.Split(line, "/")
-	id := tokens[len(tokens)-1]
-	return strconv.ParseInt(id, 10, 64)
+func parseLine(line string) (string, error) {
+	u, err := url.Parse(line)
+	if err != nil {
+		return "", err
+	}
+	id := path.Base(u.Path)
+	return id, nil
 }
 
-func cacheIdsFromFile(filename string) (map[int64]struct{}, error) {
-	cachedIds := make(map[int64]struct{})
+func cacheIdsFromFile(filename string) (map[string]struct{}, error) {
+	cachedIds := make(map[string]struct{})
 
 	fp, err := os.Open(filename)
 	if err != nil {
@@ -100,6 +104,7 @@ func main() {
 		w = f
 	}
 
+	newTweetsID := []string{}
 	stdin := bufio.NewScanner(os.Stdin)
 	for stdin.Scan() {
 		text := stdin.Text()
@@ -110,26 +115,47 @@ func main() {
 		if _, ok := cachedIds[id]; ok {
 			continue
 		}
+		newTweetsID = append(newTweetsID, id)
+	}
 
-		time.Sleep(1 * time.Second)
-		tweet, resp, err := client.Statuses.Show(id, nil)
-		if err != nil {
-			log.Printf("failed to get tweet %s: %v\n", text, err)
-			continue
-		}
-		if resp.StatusCode != 200 {
-			log.Printf("failed to get tweet %s: status=%d, %v\n", text, resp.StatusCode, err)
-			continue
-		}
+	tweets, err := fetchTweets(client, newTweetsID)
+	if err != nil {
+		log.Fatalf("failed to get tweet: %v\n", err)
+	}
 
+	for _, tweet := range tweets {
 		tweetJson, _ := json.Marshal(tweet)
 		fmt.Println(string(tweetJson))
 		fmt.Fprintln(w, string(tweetJson))
+		if err := stdin.Err(); err != nil {
+			log.Fatalln(err)
+		}
 	}
-	if err := stdin.Err(); err != nil {
-		log.Fatalln(err)
-	}
+
 	if err := w.Sync(); err != nil {
 		log.Fatalf("failed to flush tweets: %v\n", err)
 	}
+}
+
+func fetchTweets(client *twitter2.Client, ids []string) ([]*twitter2.Tweet, error) {
+	// the `tweets` API accepts less than 100 tweets.
+	const N = 100
+	c := 0
+	var tweets []*twitter2.Tweet
+	for start := 0; start < len(ids); start += N {
+		end := start + N
+		if end > len(ids) {
+			end = len(ids)
+		}
+		t, err := client.Tweets(ids[start:end])
+		if err != nil {
+			return nil, err
+		}
+		c += len(t)
+		log.Printf("fetched %d tweets...", c)
+		tweets = append(tweets, t...)
+		// avoid `too many requests`
+		time.Sleep(time.Minute)
+	}
+	return tweets, nil
 }

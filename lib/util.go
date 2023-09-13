@@ -1,8 +1,6 @@
 package sabadisambiguator
 
 import (
-	"math"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ssm"
 )
@@ -33,12 +31,19 @@ func overSampling(examples Examples) Examples {
 		examplesToBeOverSampled = negativeExamples
 	}
 
-	for i := 0; i < int(math.Abs(float64(n))); i++ {
+	for i := 0; i < abs(n); i++ {
 		shuffle(examplesToBeOverSampled)
 		result = append(result, examplesToBeOverSampled[0])
 	}
 	shuffle(result)
 	return result
+}
+
+func abs(n int) int {
+	if n < 0 {
+		return -n
+	}
+	return n
 }
 
 func GetValueFromParameterStore(svc *ssm.SSM, name string) (string, error) {
