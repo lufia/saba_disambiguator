@@ -11,7 +11,7 @@ import (
 	"log"
 	"net/url"
 	"os"
-	"strings"
+	"path"
 	"time"
 
 	"encoding/json"
@@ -28,8 +28,7 @@ func parseLine(line string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	tokens := strings.Split(u.Path, "/")
-	id := tokens[len(tokens)-1]
+	id := path.Base(u.Path)
 	return id, nil
 }
 
