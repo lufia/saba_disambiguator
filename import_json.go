@@ -137,10 +137,11 @@ func main() {
 	}
 }
 
-func fetchTweets(client *twitter2.Client, ids []string) (tweets []*twitter2.Tweet, err error) {
+func fetchTweets(client *twitter2.Client, ids []string) ([]*twitter2.Tweet, error) {
 	// the `tweets` API accepts less than 100 tweets.
 	const N = 100
 	c := 0
+	var tweets []*twitter2.Tweet
 	for start := 0; start < len(ids); start += N {
 		end := start + N
 		if end > len(ids) {
@@ -156,5 +157,5 @@ func fetchTweets(client *twitter2.Client, ids []string) (tweets []*twitter2.Twee
 		// avoid `too many requests`
 		time.Sleep(time.Minute)
 	}
-	return
+	return tweets, nil
 }
