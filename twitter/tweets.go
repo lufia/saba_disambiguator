@@ -8,11 +8,14 @@ import (
 	"github.com/google/go-querystring/query"
 )
 
-type BearerToken string
+type tweetsByIDQueryParam struct {
+	IDs         []string `url:"ids,comma"`
+	Expansions  []string `url:"expansions,comma"`
+	TweetFields []string `url:"tweet.fields,comma"`
+	UserFields  []string `url:"user.fields,comma"`
+}
 
-var Host = "api.twitter.com"
-
-type recentSearchResponse struct {
+type tweetsResponse struct {
 	// 検索によって返される tweet
 	Data []tweetResponse `json:"data"`
 
@@ -24,28 +27,11 @@ type recentSearchResponse struct {
 	} `json:"includes"`
 }
 
-type recentSearchQueryParam struct {
-	Query      string `url:"query"`
-	MaxResults int    `url:"max_results"`
+const TweetsPath = "/2/tweets"
 
-	// 検索結果の tweet のオブジェクトに置かれるフィールドを指定する。
-	TweetFields []string `url:"tweet.fields,comma"`
-
-	//　.includes.user にあるユーザー情報に含める要素
-	UserFields []string `url:"user.fields,comma"`
-
-	// .includes になんの情報を含めるか定める。
-	Expansions []string `url:"expansions,comma"`
-}
-
-const RecentSearchPath = "/2/tweets/search/recent"
-
-// https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-recent
-func (c *Client) RecentSearch(q string) ([]*Tweet, error) {
-	params := recentSearchQueryParam{
-		Query:      q,
-		MaxResults: 100,
-
+func (c *Client) Tweets(ids []string) ([]*Tweet, error) {
+	params := &tweetsByIDQueryParam{
+		IDs: ids,
 		// entities は hashtag, url などの情報
 		// referenced_tweets は 検索結果の tweet が言及している tweet (retweeted, quoted など) を含める。
 		TweetFields: []string{"created_at", "entities", "lang", "referenced_tweets", "author_id"},
@@ -56,23 +42,21 @@ func (c *Client) RecentSearch(q string) ([]*Tweet, error) {
 	}
 	v, err := query.Values(params)
 	if err != nil {
-		return nil, fmt.Errorf("twitter.RecentSearch: %w", err)
+		return nil, fmt.Errorf("twitter.tweets: %w", err)
 	}
-
 	u := &url.URL{
 		Scheme: "https",
 		Host:   Host,
-		Path:   RecentSearchPath,
+		Path:   TweetsPath,
 		// A space should be escaped into '%20' instead of '+' on twitter's query parameter.
 		RawQuery: strings.Replace(v.Encode(), "+", "%20", -1),
 	}
 
-	var resp recentSearchResponse
+	var resp tweetsResponse
 	err = c.getJSON(&resp, u)
 	if err != nil {
-		return nil, fmt.Errorf("twitter.RecentSearch: %w", err)
+		return nil, fmt.Errorf("twitter.tweets: %w", err)
 	}
-
 	users := make(map[string]*User, len(resp.Includes.Users))
 	for _, u := range resp.Includes.Users {
 		users[u.ID] = u
@@ -81,7 +65,6 @@ func (c *Client) RecentSearch(q string) ([]*Tweet, error) {
 	for _, t := range resp.Includes.Tweets {
 		includesTweets[t.ID] = t
 	}
-
 	tweets := make([]*Tweet, 0, len(resp.Data))
 	for _, d := range resp.Data {
 		t, err := tweetResponseToTweet(&d, users, includesTweets)

@@ -1,6 +1,9 @@
 package twitter2
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 // twitter API v2 が返してくる tweet object は user 情報が id で返されるなど扱いにくい。
 // そこで、 id で返される要素を他の要素と join して返している。
@@ -86,3 +89,53 @@ const (
 	typeQuoted    referencedTweetType = "quoted"
 	typeRepliedTo referencedTweetType = "replied_to"
 )
+
+func tweetResponseToTweet(t *tweetResponse, users map[string]*User, includesTweets map[string]*tweetResponse) (*Tweet, error) {
+	// tweet オブジェクトに含まれるのは auther_id (数字の並び)のみ
+	// .includes.user から対応するユーザーを持ってくる。
+	u, ok := users[t.AuthorID]
+	if !ok {
+		return nil, fmt.Errorf("twitter.tweetResponseToTweet: unkown author_id %s", t.AuthorID)
+	}
+
+	// saba_disambiguator は referenced tweets (retweeted, quoted, replied to) の中で quote された tweet のみ見ている。
+	var quotedStatus *Tweet
+	if len(t.ReferencedTweets) > 0 {
+		for _, r := range t.ReferencedTweets {
+			if r.Type != typeQuoted {
+				continue
+			}
+			tw, ok := includesTweets[r.ID]
+			if !ok {
+				return nil, fmt.Errorf("twitter.tweetResponseToTweet: unkown twitter_id %s", r.ID)
+			}
+			quotedStatus = &Tweet{
+				ID:        tw.ID,
+				Text:      tw.Text,
+				CreatedAt: tw.CreatedAt,
+				User:      users[tw.AuthorID],
+				Lang:      tw.Lang,
+			}
+		}
+	}
+
+	inReplyToUserName := ""
+	if t.InReplyToUserID != "" {
+		u, ok := users[t.InReplyToUserID]
+		if !ok {
+			return nil, fmt.Errorf("twitter.tweetResponseToTweet: unkown user_id %s", t.InReplyToUserID)
+		}
+		inReplyToUserName = u.UserName
+	}
+
+	return &Tweet{
+		ID:                t.ID,
+		Text:              t.Text,
+		CreatedAt:         t.CreatedAt,
+		User:              u,
+		Lang:              t.Lang,
+		QuotedStatus:      quotedStatus,
+		InReplyToUserName: inReplyToUserName,
+		Entities:          t.Entities,
+	}, nil
+}
