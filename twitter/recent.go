@@ -2,6 +2,7 @@ package twitter2
 
 import (
 	"fmt"
+	"log"
 	"net/url"
 	"strings"
 
@@ -86,6 +87,7 @@ func (c *Client) RecentSearch(q string) ([]*Tweet, error) {
 	for _, d := range resp.Data {
 		t, err := tweetResponseToTweet(&d, users, includesTweets)
 		if err != nil {
+			log.Print(err)
 			continue
 		}
 		tweets = append(tweets, t)
