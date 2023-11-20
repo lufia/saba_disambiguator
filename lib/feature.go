@@ -145,9 +145,9 @@ func ExtractFeaturesWithOptions(t *twitter2.Tweet, opts ExtractOptions) FeatureV
 	fv = append(fv, "inReplyToScreenName:"+inReplyToScreenName(t))
 	fv = append(fv, "screenNameInQuotedStatus:"+screenNameInQuotedStatus(t))
 	fv = append(fv, "lang:"+lang(t))
-	fv = append(fv, "containsMackerelInScreenName:"+strconv.FormatBool(opts.contains(t.User.UserName)))
-	fv = append(fv, "includeMackerelInUserMentions:"+strconv.FormatBool(opts.includeScreenNameInUserMentions(t)))
-	fv = append(fv, "includeMackerelInReplyToScreenName:"+strconv.FormatBool(opts.includeScreenNameInReplyToScreenName(t)))
+	fv = append(fv, "containsNameInScreenName:"+strconv.FormatBool(opts.contains(t.User.UserName)))
+	fv = append(fv, "includeNameInUserMentions:"+strconv.FormatBool(opts.includeScreenNameInUserMentions(t)))
+	fv = append(fv, "includeNameInReplyToScreenName:"+strconv.FormatBool(opts.includeScreenNameInReplyToScreenName(t)))
 
 	fv = append(fv, ExtractNounFeatures(text, "Text")...)
 	fv = append(fv, extractNounFeaturesFromQuotedText(t)...)
