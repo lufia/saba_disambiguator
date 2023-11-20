@@ -141,9 +141,11 @@ func ExtractFeaturesWithOptions(t *twitter2.Tweet, opts ExtractOptions) FeatureV
 	text := t.Text
 
 	fv = append(fv, "BIAS")
-	fv = append(fv, "ScreenName:"+t.User.UserName)
-	fv = append(fv, "inReplyToScreenName:"+inReplyToScreenName(t))
-	fv = append(fv, "screenNameInQuotedStatus:"+screenNameInQuotedStatus(t))
+	if len(opts.ScreenNames) == 0 {
+		fv = append(fv, "ScreenName:"+t.User.UserName)
+		fv = append(fv, "inReplyToScreenName:"+inReplyToScreenName(t))
+		fv = append(fv, "screenNameInQuotedStatus:"+screenNameInQuotedStatus(t))
+	}
 	fv = append(fv, "lang:"+lang(t))
 	fv = append(fv, "containsNameInScreenName:"+strconv.FormatBool(opts.contains(t.User.UserName)))
 	fv = append(fv, "includeNameInUserMentions:"+strconv.FormatBool(opts.includeScreenNameInUserMentions(t)))

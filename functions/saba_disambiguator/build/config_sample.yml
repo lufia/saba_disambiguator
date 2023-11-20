@@ -13,6 +13,10 @@ bigquery:
   projectId: my-project
   dataset: my_dataset
   table: my_table 
+# 特定アカウントへの返信または引用かどうかを特徴量の計算に利用します
+# スクリーンネームの比較は完全一致です
+#
+# 以前の挙動を維持するため、screenNamesが未設定の場合は 'mackerel' という文字列を含むかどうかで判定します
 screenNames:
   - mackerelio
   - mackerelio_jp
