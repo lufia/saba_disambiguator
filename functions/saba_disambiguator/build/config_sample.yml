@@ -1,4 +1,4 @@
-query: "mackerel lang:ja exclude:retweets"
+query: "mackerel lang:ja -is:retweet"
 region: "ap-northeast-1"
 twitter: # Twitterから情報を取得するためのシークレットキーが保存されているAWSパラメータストアの名前を書きます
   parameterStoreNameConsumerKey: "/path/to/ConsumerKey"
