@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"slices"
+	"strings"
 	"time"
 
 	sabadisambiguator "github.com/syou6162/saba_disambiguator/lib"
@@ -97,16 +99,19 @@ func DoDisambiguate() error {
 		if now.After(createdAt.Add(5 * time.Minute)) {
 			continue
 		}
-
-		tweetJson, err := json.Marshal(t)
-		if err != nil {
-			return err
+		if isSpam(t, config.SpamTexts) {
+			continue
 		}
+
 		fv := sabadisambiguator.ExtractFeaturesWithOptions(t, sabadisambiguator.ExtractOptions{
 			ScreenNames: config.ScreenNames,
 		})
 		score := model.PredictScore(fv)
 		predLabel := model.Predict(fv)
+		tweetJson, err := json.Marshal(t)
+		if err != nil {
+			return err
+		}
 		item := ItemForBigQuery{
 			CreatedAt:  createdAt,
 			IdStr:      t.ID,
@@ -171,6 +176,12 @@ func postJSON(url string, v any) error {
 	}
 
 	return nil
+}
+
+func isSpam(t *twitter2.Tweet, texts []string) bool {
+	return slices.ContainsFunc(texts, func(s string) bool {
+		return strings.Contains(t.Text, s)
+	})
 }
 
 func formatTweetIntoSlackPayload(t *twitter2.Tweet) slack.Payload {

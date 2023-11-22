@@ -29,6 +29,7 @@ type Config struct {
 	Query          string         `yaml:"query"`
 	Region         string         `yaml:"region"`
 	ScreenNames    []string       `yaml:"screenNames"`
+	SpamTexts      []string       `yaml:"spam"`
 }
 
 func GetConfigFromFile(configPath string) (*Config, error) {
