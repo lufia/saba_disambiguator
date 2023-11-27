@@ -1,11 +1,12 @@
 module github.com/syou6162/saba_disambiguator
 
-go 1.19
+go 1.21
 
 require (
 	cloud.google.com/go/bigquery v1.50.0
 	github.com/aws/aws-lambda-go v1.34.1
 	github.com/aws/aws-sdk-go v1.44.124
+	github.com/dghubble/go-twitter v0.0.0-20221104224141-912508c3888b
 	github.com/google/go-querystring v1.1.0
 	github.com/ikawaha/kagome.ipadic v1.1.2
 	google.golang.org/api v0.114.0
@@ -20,6 +21,8 @@ require (
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/apache/arrow/go/v11 v11.0.0 // indirect
 	github.com/apache/thrift v0.16.0 // indirect
+	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
+	github.com/dghubble/sling v1.4.0 // indirect
 	github.com/goccy/go-json v0.9.11 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
