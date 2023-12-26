@@ -37,7 +37,7 @@ format:
 
 .PHONY: sam-package
 sam-package:
-	cd functions/saba_disambiguator; GOARCH=amd64 GOOS=linux go build -o build/saba_disambiguator main.go
+	cd functions/saba_disambiguator; GOARCH=amd64 GOOS=linux go build -o build/bootstrap main.go
 	if aws s3 ls "s3://${BUCKET_NAME}" 2>&1 | grep -q 'AccessDenied'; then \
 		echo "AccessDenied" && exit 1; \
 	fi

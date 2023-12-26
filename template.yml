@@ -7,9 +7,13 @@ Parameters:
 Resources:
   LambdaSabaDisambiguator:
     Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: go1.x
     Properties:
-      Handler: saba_disambiguator
-      Runtime: go1.x
+      Handler: bootstrap
+      Runtime: provided.al2023
+      Architectures:
+        - x86_64
       MemorySize: 256
       CodeUri: functions/saba_disambiguator/build
       Timeout: 120
