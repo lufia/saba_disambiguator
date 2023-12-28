@@ -2,6 +2,7 @@ package sabadisambiguator
 
 import (
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -141,7 +142,9 @@ func ExtractFeaturesWithOptions(t *twitter2.Tweet, opts ExtractOptions) FeatureV
 	text := t.Text
 
 	fv = append(fv, "BIAS")
-	if len(opts.ScreenNames) == 0 {
+	if len(opts.ScreenNames) > 0 {
+		text = removeScreenNames(text)
+	} else {
 		fv = append(fv, "ScreenName:"+t.User.UserName)
 		fv = append(fv, "inReplyToScreenName:"+inReplyToScreenName(t))
 		fv = append(fv, "screenNameInQuotedStatus:"+screenNameInQuotedStatus(t))
@@ -158,4 +161,11 @@ func ExtractFeaturesWithOptions(t *twitter2.Tweet, opts ExtractOptions) FeatureV
 	fv = append(fv, hashtagsInEntities(t)...)
 	fv = append(fv, wordsInUrlPaths(t)...)
 	return fv
+}
+
+// https://help.twitter.com/managing-your-account/x-username-rules
+var screenNamePattern = regexp.MustCompile("@[a-zA-Z0-9_]{4,50}[ \t]*")
+
+func removeScreenNames(s string) string {
+	return screenNamePattern.ReplaceAllLiteralString(s, "")
 }
