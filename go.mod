@@ -2,7 +2,7 @@ module github.com/syou6162/saba_disambiguator
 
 go 1.24.0
 
-toolchain go1.24.1
+toolchain go1.26.2
 
 require (
 	cloud.google.com/go/bigquery v1.65.0
