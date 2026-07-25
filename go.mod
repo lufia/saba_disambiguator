@@ -7,7 +7,7 @@ toolchain go1.26.2
 require (
 	cloud.google.com/go/bigquery v1.79.0
 	github.com/aws/aws-lambda-go v1.47.0
-	github.com/aws/aws-sdk-go v1.55.5
+	github.com/aws/aws-sdk-go v1.55.8
 	github.com/google/go-querystring v1.1.0
 	github.com/ikawaha/kagome.ipadic v1.1.2
 	google.golang.org/api v0.287.1
