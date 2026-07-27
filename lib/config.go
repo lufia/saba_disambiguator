@@ -1,7 +1,7 @@
 package sabadisambiguator
 
 import (
-	"io/ioutil"
+	"os"
 
 	"gopkg.in/yaml.v2"
 )
@@ -35,7 +35,7 @@ type Config struct {
 func GetConfigFromFile(configPath string) (*Config, error) {
 	config := Config{}
 
-	data, err := ioutil.ReadFile(configPath)
+	data, err := os.ReadFile(configPath)
 	if err != nil {
 		return nil, err
 	}
