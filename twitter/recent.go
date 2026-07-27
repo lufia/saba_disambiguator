@@ -1,6 +1,7 @@
 package twitter2
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/url"
@@ -42,7 +43,7 @@ type recentSearchQueryParam struct {
 const RecentSearchPath = "/2/tweets/search/recent"
 
 // https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-recent
-func (c *Client) RecentSearch(q string) ([]*Tweet, error) {
+func (c *Client) RecentSearch(ctx context.Context, q string) ([]*Tweet, error) {
 	params := recentSearchQueryParam{
 		Query:      q,
 		MaxResults: 100,
@@ -69,7 +70,7 @@ func (c *Client) RecentSearch(q string) ([]*Tweet, error) {
 	}
 
 	var resp recentSearchResponse
-	err = c.getJSON(&resp, u)
+	err = c.getJSON(ctx, &resp, u)
 	if err != nil {
 		return nil, fmt.Errorf("twitter.RecentSearch: %w", err)
 	}

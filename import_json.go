@@ -115,7 +115,7 @@ func main() {
 		newTweetsID = append(newTweetsID, id)
 	}
 
-	tweets, err := fetchTweets(client, newTweetsID)
+	tweets, err := fetchTweets(ctx, client, newTweetsID)
 	if err != nil {
 		log.Fatalf("failed to get tweet: %v\n", err)
 	}
@@ -134,7 +134,7 @@ func main() {
 	}
 }
 
-func fetchTweets(client *twitter2.Client, ids []string) ([]*twitter2.Tweet, error) {
+func fetchTweets(ctx context.Context, client *twitter2.Client, ids []string) ([]*twitter2.Tweet, error) {
 	// the `tweets` API accepts less than 100 tweets.
 	const N = 100
 	c := 0
@@ -144,7 +144,7 @@ func fetchTweets(client *twitter2.Client, ids []string) ([]*twitter2.Tweet, erro
 		if end > len(ids) {
 			end = len(ids)
 		}
-		t, err := client.Tweets(ids[start:end])
+		t, err := client.Tweets(ctx, ids[start:end])
 		if err != nil {
 			return nil, err
 		}

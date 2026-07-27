@@ -87,7 +87,7 @@ func DoDisambiguate(ctx context.Context) error {
 		query = config.Query
 	}
 
-	resp, err := client.RecentSearch(query)
+	resp, err := client.RecentSearch(ctx, query)
 
 	if err != nil {
 		return err
