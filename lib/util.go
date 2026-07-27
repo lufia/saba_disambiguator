@@ -17,9 +17,10 @@ func overSampling(examples Examples) Examples {
 	negativeExamples := Examples{}
 
 	for _, e := range examples {
-		if e.Label == POSITIVE {
+		switch e.Label {
+		case POSITIVE:
 			positiveExamples = append(positiveExamples, e)
-		} else if e.Label == NEGATIVE {
+		case NEGATIVE:
 			negativeExamples = append(negativeExamples, e)
 		}
 	}
