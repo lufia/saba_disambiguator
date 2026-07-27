@@ -5,6 +5,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"flag"
 	"fmt"
 	"io"
@@ -16,9 +17,8 @@ import (
 
 	"encoding/json"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ssm"
+	awsConfig "github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	sabadisambiguator "github.com/syou6162/saba_disambiguator/lib"
 	twitter2 "github.com/syou6162/saba_disambiguator/twitter"
 )
@@ -68,23 +68,20 @@ func (*nopWriter) Sync() error                 { return nil }
 func main() {
 	log.SetFlags(0)
 	flag.Parse()
+	ctx := context.Background()
 
 	config, err := sabadisambiguator.GetConfigFromFile("functions/saba_disambiguator/build/config.yml")
 	if err != nil {
 		log.Fatalf("failed to load config: %v\n", err)
 	}
 
-	sess, err := session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	})
+	awsCfg, err := awsConfig.LoadDefaultConfig(ctx, awsConfig.WithRegion(config.Region))
 	if err != nil {
 		log.Fatalf("failed to get session: %v\n", err)
 	}
-	svc := ssm.New(sess, &aws.Config{
-		Region: aws.String(config.Region),
-	})
+	svc := ssm.NewFromConfig(awsCfg)
 
-	client, err := sabadisambiguator.GetTwitterClient(svc, *config)
+	client, err := sabadisambiguator.GetTwitterClient(ctx, svc, *config)
 	if err != nil {
 		log.Fatalf("failed to get Twitter client: %v\n", err)
 	}
@@ -118,7 +115,7 @@ func main() {
 		newTweetsID = append(newTweetsID, id)
 	}
 
-	tweets, err := fetchTweets(client, newTweetsID)
+	tweets, err := fetchTweets(ctx, client, newTweetsID)
 	if err != nil {
 		log.Fatalf("failed to get tweet: %v\n", err)
 	}
@@ -137,7 +134,7 @@ func main() {
 	}
 }
 
-func fetchTweets(client *twitter2.Client, ids []string) ([]*twitter2.Tweet, error) {
+func fetchTweets(ctx context.Context, client *twitter2.Client, ids []string) ([]*twitter2.Tweet, error) {
 	// the `tweets` API accepts less than 100 tweets.
 	const N = 100
 	c := 0
@@ -147,7 +144,7 @@ func fetchTweets(client *twitter2.Client, ids []string) ([]*twitter2.Tweet, erro
 		if end > len(ids) {
 			end = len(ids)
 		}
-		t, err := client.Tweets(ids[start:end])
+		t, err := client.Tweets(ctx, ids[start:end])
 		if err != nil {
 			return nil, err
 		}

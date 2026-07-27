@@ -3,7 +3,6 @@ package sabadisambiguator
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 )
 
@@ -113,7 +112,7 @@ func WritePerceptron(perceptron PerceptronClassifier, filename string) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(filename, perceptronJson, 0644)
+	err = os.WriteFile(filename, perceptronJson, 0644)
 	if err != nil {
 		return err
 	}
@@ -123,7 +122,7 @@ func WritePerceptron(perceptron PerceptronClassifier, filename string) error {
 
 func LoadPerceptron(filename string) (*PerceptronClassifier, error) {
 	perceptron := PerceptronClassifier{}
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}

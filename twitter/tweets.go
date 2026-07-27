@@ -1,6 +1,7 @@
 package twitter2
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/url"
@@ -30,7 +31,7 @@ type tweetsResponse struct {
 
 const TweetsPath = "/2/tweets"
 
-func (c *Client) Tweets(ids []string) ([]*Tweet, error) {
+func (c *Client) Tweets(ctx context.Context, ids []string) ([]*Tweet, error) {
 	params := &tweetsByIDQueryParam{
 		IDs: ids,
 		// entities は hashtag, url などの情報
@@ -54,7 +55,7 @@ func (c *Client) Tweets(ids []string) ([]*Tweet, error) {
 	}
 
 	var resp tweetsResponse
-	err = c.getJSON(&resp, u)
+	err = c.getJSON(ctx, &resp, u)
 	if err != nil {
 		return nil, fmt.Errorf("twitter.tweets: %w", err)
 	}

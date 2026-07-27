@@ -2,6 +2,7 @@ package twitter2
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -17,19 +18,11 @@ func NewClient(bearerToken string) *Client {
 	return &Client{bearerToken: bearerToken}
 }
 
-func (c *Client) newHeader() http.Header {
-	p := http.Header{}
-	p.Set("Authorization", fmt.Sprintf("Bearer %s", c.bearerToken))
-	p.Set("User-Agent", "sabadisambiguator")
-	return p
-}
+func (c *Client) getJSON(ctx context.Context, v any, u *url.URL) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.bearerToken))
+	req.Header.Set("User-Agent", "sabadisambiguator")
 
-func (c *Client) getJSON(v any, u *url.URL) error {
-	req := &http.Request{
-		Method: "GET",
-		Header: c.newHeader(),
-		URL:    u,
-	}
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err

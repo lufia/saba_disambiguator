@@ -17,9 +17,8 @@ import (
 
 	"cloud.google.com/go/bigquery"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ssm"
+	awsConfig "github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	"github.com/syou6162/saba_disambiguator/slack"
 	"google.golang.org/api/option"
 )
@@ -39,16 +38,16 @@ type SlackConfig struct {
 	WebhookUrlNegative string
 }
 
-func getSlackConfig(svc *ssm.SSM, config sabadisambiguator.Config) (SlackConfig, error) {
+func getSlackConfig(ctx context.Context, svc *ssm.Client, config sabadisambiguator.Config) (SlackConfig, error) {
 	slackConfig := SlackConfig{}
 
-	webhookUrlPositive, err := sabadisambiguator.GetValueFromParameterStore(svc, config.SlackConfig.ParameterStoreNameWebhookUrlPositive)
+	webhookUrlPositive, err := sabadisambiguator.GetValueFromParameterStore(ctx, svc, config.SlackConfig.ParameterStoreNameWebhookUrlPositive)
 	if err != nil {
 		return slackConfig, err
 	}
 	slackConfig.WebhookUrlPositive = webhookUrlPositive
 
-	webhookUrlNegative, err := sabadisambiguator.GetValueFromParameterStore(svc, config.SlackConfig.ParameterStoreNameWebhookUrlNegative)
+	webhookUrlNegative, err := sabadisambiguator.GetValueFromParameterStore(ctx, svc, config.SlackConfig.ParameterStoreNameWebhookUrlNegative)
 	if err != nil {
 		return slackConfig, err
 	}
@@ -57,21 +56,24 @@ func getSlackConfig(svc *ssm.SSM, config sabadisambiguator.Config) (SlackConfig,
 	return slackConfig, nil
 }
 
-func DoDisambiguate() error {
+func DoDisambiguate(ctx context.Context) error {
 	config, err := sabadisambiguator.GetConfigFromFile("config.yml")
 	if err != nil {
 		return err
 	}
-	svc := ssm.New(session.New(), &aws.Config{
-		Region: aws.String(config.Region),
-	})
-
-	client, err := sabadisambiguator.GetTwitterClient(svc, *config)
+	awsCfg, err := awsConfig.LoadDefaultConfig(ctx, awsConfig.WithRegion(config.Region))
 	if err != nil {
 		return err
 	}
 
-	slackConfig, err := getSlackConfig(svc, *config)
+	svc := ssm.NewFromConfig(awsCfg)
+
+	client, err := sabadisambiguator.GetTwitterClient(ctx, svc, *config)
+	if err != nil {
+		return err
+	}
+
+	slackConfig, err := getSlackConfig(ctx, svc, *config)
 	if err != nil {
 		return err
 	}
@@ -85,7 +87,7 @@ func DoDisambiguate() error {
 		query = config.Query
 	}
 
-	resp, err := client.RecentSearch(query)
+	resp, err := client.RecentSearch(ctx, query)
 
 	if err != nil {
 		return err
@@ -137,11 +139,10 @@ func DoDisambiguate() error {
 	}
 
 	if config.BigQueryConfig.ProjectId != "" && len(itemsForBq) > 0 {
-		serviceAccountCredential, err := sabadisambiguator.GetValueFromParameterStore(svc, config.BigQueryConfig.ParameterStoreNameServiceAccountCredential)
+		serviceAccountCredential, err := sabadisambiguator.GetValueFromParameterStore(ctx, svc, config.BigQueryConfig.ParameterStoreNameServiceAccountCredential)
 		if err != nil {
 			return err
 		}
-		ctx := context.Background()
 		bqClient, err := bigquery.NewClient(ctx, config.BigQueryConfig.ProjectId, option.WithCredentialsJSON([]byte(serviceAccountCredential)))
 		if err != nil {
 			return err
