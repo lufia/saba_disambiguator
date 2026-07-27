@@ -1,8 +1,10 @@
 package sabadisambiguator
 
 import (
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/ssm"
+	"context"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/ssm"
 )
 
 func splitTrainAndDev(examples Examples) (train Examples, dev Examples) {
@@ -47,8 +49,8 @@ func abs(n int) int {
 	return n
 }
 
-func GetValueFromParameterStore(svc *ssm.SSM, name string) (string, error) {
-	res, err := svc.GetParameter(&ssm.GetParameterInput{
+func GetValueFromParameterStore(ctx context.Context, svc *ssm.Client, name string) (string, error) {
+	res, err := svc.GetParameter(ctx, &ssm.GetParameterInput{
 		Name:           aws.String(name),
 		WithDecryption: aws.Bool(true),
 	})
