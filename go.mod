@@ -12,7 +12,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.73.0
 	github.com/google/go-querystring v1.2.0
 	github.com/ikawaha/kagome.ipadic v1.1.2
-	google.golang.org/api v0.289.0
+	google.golang.org/api v0.290.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
